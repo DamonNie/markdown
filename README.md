@@ -21,9 +21,9 @@
  
 ### a标签:
  ```html
-[普通链接](https://www.mdeditor.com/)
+[普通链接](https://www.mdeditor.com/ "")
  ```
-[普通链接](https://www.mdeditor.com/)
+[普通链接](https://www.mdeditor.com/ "")
  
 ### blockquote标签:
  ```html
