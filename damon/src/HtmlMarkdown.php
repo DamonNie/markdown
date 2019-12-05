@@ -67,9 +67,10 @@ class HtmlMarkdown extends Parse
     {
         $pattern_array = [
             //统一处理去掉外层html元素的情况
+            ["#[ ]*<figcaption[^>]*?>(.*?)</figcaption>#is", '$1', '</figcaption>'],
+            ["#[ ]*<figure[^>]*?>(.*?)</figure>#is", '$1', '</figure>'],
             ["#[ ]*<div[^>]*?>(.*?)</div>#is", '$1', '</div>'],
             ["#[ ]*<article[^>]*?>(.*?)</article>#is", '$1', '</article>'],
-            ["#[ ]*<p[^>]*?>(.*?)</p>#is", '$1', 'p>'],
             ["#[ ]*<span[^>]*?>(.*?)</span>#is", '$1', '</span>'],
             ["#[ ]*<u[^>]*?>(.*?)</u>#is", '$1', '</u>'],
             ["#[ ]*<font[^>]*?>(.*?)</font>#is", '$1', '</font>'],
@@ -77,10 +78,11 @@ class HtmlMarkdown extends Parse
             ["#[ ]*<path[^>]*?>(.*?)</path>#is", '$1', '</path>'],
             ["#[ ]*<caption[^>]*?>(.*?)</caption>#is", '$1', '</caption>'],
             ["#[ ]*<button[^>]*?>(.*?)</button>#is", '$1', '</button>'],
-            //处理code标签
+            //处理p code标签
             ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```$2```", '</code></pre>'],
             ['#[ ]*<code[^>]*?>(.*?)</code>#is', "`$1`", '</code>'],
             ['#[ ]*<pre[^>]*?>(.*?)</pre>#is', "`$1`", '</pre>'],
+            ["#[ ]*<p[^>]*?>(.*?)</p>#is", '$1', 'p>'],
             //处理strong标签
             ["#[ ]*<strong[^>]*?>(\s*)?(.*?)</strong>#is", "**$2**", '</strong>'],
             ["#[ ]*<b[^>]*?>(\s*)?(.*?)</b>#is", "**$2**", '</b>'],
