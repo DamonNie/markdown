@@ -1,0 +1,41 @@
+<h3 class="heading" data-id="heading-25">404页面</h3>
+<p>原来的主题没有404页面，首先在<code>/source/</code>目录下新建一个<code>404.md</code>，内容如下：</p>
+<pre><code class="hljs js copyable" lang="js">---
+title: <span class="hljs-number">404</span>
+date: <span class="hljs-number">2017</span><span class="hljs-number">-07</span><span class="hljs-number">-19</span> <span class="hljs-number">16</span>:<span class="hljs-number">41</span>:<span class="hljs-number">10</span>
+type: <span class="hljs-string">"404"</span>
+layout: <span class="hljs-string">"404"</span>
+description: <span class="hljs-string">"你访问的页面被外星人叼走了 :("</span>
+---
+<span class="copy-code-btn">复制代码</span></code></pre><p>然后在<code>/themes/matery/layout/</code>目录下新建一个<code>404.ejs</code>文件，内容如下：</p>
+<pre><code class="hljs html copyable" lang="html"><span class="hljs-tag">&lt;<span class="hljs-name">style</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span>&gt;</span><span class="css">
+    <span class="hljs-comment">/* don't remove. */</span>
+    <span class="hljs-selector-class">.about-cover</span> {
+        <span class="hljs-attribute">height</span>: <span class="hljs-number">75vh</span>;
+    }
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">style</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"bg-cover pd-header about-cover"</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"container"</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"row"</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"col s10 offset-s1 m8 offset-m2 l8 offset-l2"</span>&gt;</span>
+                <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"brand"</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"title center-align"</span>&gt;</span>
+                        404
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                    <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">class</span>=<span class="hljs-string">"description center-align"</span>&gt;</span>
+                        <span class="hljs-tag">&lt;<span class="hljs-name">%=</span> <span class="hljs-attr">page.description</span> %&gt;</span>
+                    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+                <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span>&gt;</span><span class="javascript">
+    <span class="hljs-comment">// 每天切换 banner 图.  Switch banner image every day.</span>
+    $(<span class="hljs-string">'.bg-cover'</span>).css(<span class="hljs-string">'background-image'</span>, <span class="hljs-string">'url(/medias/banner/'</span> + <span class="hljs-keyword">new</span> <span class="hljs-built_in">Date</span>().getDay() + <span class="hljs-string">'.jpg)'</span>);
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+
+<span class="copy-code-btn">复制代码</span></code></pre><p>效果如下：</p>
+<p></p><figure><img class="lazyload" data-src="https://user-gold-cdn.xitu.io/2019/9/18/16d43217a18fcfc6?imageView2/0/w/1280/h/960/ignore-error/1" data-width="1280" data-height="660"><figcaption></figcaption></figure><p></p>

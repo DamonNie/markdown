@@ -30,8 +30,9 @@ class HtmlMarkdown extends Parse
         $reg[] = "#[ ]*<script.*?>.*?</script>#si";//去除script
         $reg[] = "/[ ]*<(\!DOCTYPE*.*?)>/si";//去除<!DOCTYPE*/  /<(\!(\s\S)?)>/si
         $reg[] = "/[ ]*<(\/?html.*?)>/si"; //去除外层html
-        $reg[] = "/[ ]*<(\/?input.*?)>/si"; //去除外层html
+        $reg[] = "/[ ]*<(\/?input.*?)>/si"; //去除外层input
         $reg[] = "/[ ]*<(\/?body.*?)>/si"; //去除外层body
+        $reg[] = "/[ ]*<(\/?meta.*?)>/si"; //去除外层meta
         $reg[] = "/[ ]*<\!--([\s\S]*)?-->/si"; //去除注释
         $this->element = preg_replace($reg, '', $this->element);
         //单引号转为双引号
@@ -79,7 +80,8 @@ class HtmlMarkdown extends Parse
             ["#[ ]*<caption[^>]*?>(.*?)</caption>#is", '$1', '</caption>'],
             ["#[ ]*<button[^>]*?>(.*?)</button>#is", '$1', '</button>'],
             //处理p code标签
-            ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```$2```", '</code></pre>'],
+            ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```
+            $2```", '</code></pre>'],
             ['#[ ]*<code[^>]*?>(.*?)</code>#is', "`$1`", '</code>'],
             ['#[ ]*<pre[^>]*?>(.*?)</pre>#is', "`$1`", '</pre>'],
             ["#[ ]*<p[^>]*?>(.*?)</p>#is", '$1', 'p>'],

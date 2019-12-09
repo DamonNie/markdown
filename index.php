@@ -6,6 +6,7 @@ require_once "./vendor/autoload.php";
 use damon\src\Convert;
 
 $path_arr = ['a', 'blockquote', 'code', 'h', 'hr', 'i', 'md', 'ol', 'strike', 'strong', 'table', 'ul'];
+$path_arr = ['js'];
 
 foreach ($path_arr as $value) {
     $path = __DIR__ . '/data/' . $value . '.html';
