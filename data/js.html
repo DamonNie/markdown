@@ -1,4 +1,50 @@
-<article data-v-0526462d="" itemscope="itemscope" itemtype="http://schema.org/Article" class="article" data-v-0591b948=""><meta itemprop="url" content="https://juejin.im/post/5aa1395c6fb9a028df223516"><meta itemprop="headline" content="JS中浮点数精度问题"><meta itemprop="keywords" content="Chrome,JavaScript,前端,单元测试"><meta itemprop="datePublished" content="2018-03-08T13:26:00.956Z"><meta itemprop="image" content="https://b-gold-cdn.xitu.io/icon/icon-128.png"><div itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person"><meta itemprop="name" content="谢小飞"><meta itemprop="url" content="https://juejin.im/user/580038cebf22ec0064bd0b2d"></div><div itemprop="publisher" itemscope="itemscope" itemtype="http://schema.org/Organization"><meta itemprop="name" content="掘金"><div itemprop="logo" itemscope="itemscope" itemtype="https://schema.org/ImageObject"><meta itemprop="url" content="https://b-gold-cdn.xitu.io/icon/icon-white-180.png"><meta itemprop="width" content="180"><meta itemprop="height" content="180"></div></div><div data-v-0526462d="" class="author-info-block"><a data-v-0526462d="" href="/user/580038cebf22ec0064bd0b2d" target="_blank" rel="" class="avatar-link"><div data-v-10f5e1e2="" data-v-762a6aba="" data-v-0526462d="" data-src="https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1" class="lazy avatar avatar loaded" style="background-image: url(&quot;https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1&quot;);"></div></a><div data-v-0526462d="" class="author-info-box"><a data-v-db47c888="" data-v-0526462d="" href="/user/580038cebf22ec0064bd0b2d" target="_blank" rel="" class="username username ellipsis">谢小飞<a data-v-0ba9b815="" data-v-db47c888="" href="/book/5c90640c5188252d7941f5bb/section/5c9065385188252da6320022" target="_blank" rel="" class="rank"><img data-v-0ba9b815="" src="https://b-gold-cdn.xitu.io/v3/static/img/lv-3.e108c68.svg" alt="lv-3"></a></a><div data-v-0526462d="" class="meta-box"><time data-v-0526462d="" datetime="2018-03-08T13:26:00.956Z" title="Thu Mar 08 2018 21:26:00 GMT+0800 (中国标准时间)" class="time">2018年03月08日</time><span data-v-0526462d="" class="views-count">阅读 8150</span><!----></div></div><button data-v-0bccdb0e="" data-v-0526462d="" class="follow-button follow">关注</button></div><!----><h1 data-v-0526462d="" class="article-title">JS中浮点数精度问题</h1><div data-v-0526462d="" data-id="5aa139e8518825558a062e8a" itemprop="articleBody" class="article-content"><p>  最近在做项目的时候，涉及到商品价格的计算，经常会出现计算出现精度问题。刚开始草草了事，直接用toFixed就解决了问题，并没有好好的思考一下这个问题。后来慢慢的，问题越来越多，连toFixed也出现了（允悲），后来经过搜索网上的各种博客和论坛，整理总结了一下。</p>
+<article data-v-0526462d="" itemscope="itemscope" itemtype="http://schema.org/Article" class="article" data-v-0591b948="">
+    <meta itemprop="url" content="https://juejin.im/post/5aa1395c6fb9a028df223516">
+    <meta itemprop="headline" content="JS中浮点数精度问题">
+    <meta itemprop="keywords" content="Chrome,JavaScript,前端,单元测试">
+    <meta itemprop="datePublished" content="2018-03-08T13:26:00.956Z">
+    <meta itemprop="image" content="https://b-gold-cdn.xitu.io/icon/icon-128.png">
+    <div itemprop="author" itemscope="itemscope" itemtype="http://schema.org/Person">
+        <meta itemprop="name" content="谢小飞">
+        <meta itemprop="url" content="https://juejin.im/user/580038cebf22ec0064bd0b2d">
+    </div>
+    <div itemprop="publisher" itemscope="itemscope" itemtype="http://schema.org/Organization">
+        <meta itemprop="name" content="掘金">
+        <div itemprop="logo" itemscope="itemscope" itemtype="https://schema.org/ImageObject">
+            <meta itemprop="url" content="https://b-gold-cdn.xitu.io/icon/icon-white-180.png">
+            <meta itemprop="width" content="180">
+            <meta itemprop="height" content="180">
+        </div>
+    </div>
+    <div data-v-0526462d="" class="author-info-block">
+        <a data-v-0526462d="" href="/user/580038cebf22ec0064bd0b2d" target="_blank" rel="" class="avatar-link">
+            <div data-v-10f5e1e2="" data-v-762a6aba="" data-v-0526462d="" data-src="https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1" class="lazy avatar avatar loaded" style="background-image: url(&quot;https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1&quot;);">
+            </div>
+        </a>
+        <div data-v-0526462d="" class="author-info-box">
+            <a data-v-db47c888="" data-v-0526462d="" href="/user/580038cebf22ec0064bd0b2d" target="_blank" rel="" class="username username ellipsis">
+                谢小飞
+                <a data-v-0ba9b815="" data-v-db47c888="" href="/book/5c90640c5188252d7941f5bb/section/5c9065385188252da6320022" target="_blank" rel="" class="rank">
+                    <img data-v-0ba9b815="" src="https://b-gold-cdn.xitu.io/v3/static/img/lv-3.e108c68.svg" alt="lv-3">
+                </a>
+            </a>
+            <div data-v-0526462d="" class="meta-box">
+                <time data-v-0526462d="" datetime="2018-03-08T13:26:00.956Z" title="Thu Mar 08 2018 21:26:00 GMT+0800 (中国标准时间)" class="time">
+                    2018年03月08日
+                </time>
+                <span data-v-0526462d="" class="views-count">
+                    阅读 8150
+                </span>
+                <!---->
+            </div>
+        </div>
+        <button data-v-0bccdb0e="" data-v-0526462d="" class="follow-button follow">
+            关注
+        </button>
+    </div><!---->
+    <h1 data-v-0526462d="" class="article-title">JS中浮点数精度问题</h1>
+    <div data-v-0526462d="" data-id="5aa139e8518825558a062e8a" itemprop="articleBody" class="article-content">
+        <p>  最近在做项目的时候，涉及到商品价格的计算，经常会出现计算出现精度问题。刚开始草草了事，直接用toFixed就解决了问题，并没有好好的思考一下这个问题。后来慢慢的，问题越来越多，连toFixed也出现了（允悲），后来经过搜索网上的各种博客和论坛，整理总结了一下。</p>
 <h1 class="heading" data-id="heading-0">问题的发现</h1>
 <p>  总结了一下，一共有以下两种问题</p>
 <h2 class="heading" data-id="heading-1">浮点数运算后的精度问题</h2>
@@ -239,6 +285,4 @@
         <span class="hljs-attr">divide</span>: divide
     }
 }();
-<span class="copy-code-btn">复制代码</span></code></pre><p>  如果觉得floatObj调用麻烦，我们可以在Number.prototype上添加对应的运算方法。</p>
-<p>如果觉得写得还不错，请关注我的<a style="color:#f63;text-decoration:none;" href="//juejin.im/user/580038cebf22ec0064bd0b2d" target="_blank" rel="">掘金主页</a>。更多文章请访问<a style="color:#f63;text-decoration:none;" href="https://acexyf.github.io" target="_blank" rel="nofollow noopener noreferrer">谢小飞的博客</a></p>
-</div></article>
+```

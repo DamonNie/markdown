@@ -1,9 +1,23 @@
-[<div data-v-10f5e1e2="" data-v-762a6aba="" data-v-0526462d="" data-src="https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1" class="lazy avatar avatar loaded" style="background-image: url("https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1");">](/user/580038cebf22ec0064bd0b2d "")[谢小飞[![lv-3](https://b-gold-cdn.xitu.io/v3/static/img/lv-3.e108c68.svg "")](/user/580038cebf22ec0064bd0b2d "")](/book/5c90640c5188252d7941f5bb/section/5c9065385188252da6320022 "")<div data-v-0526462d="" class="meta-box"><time data-v-0526462d="" datetime="2018-03-08T13:26:00.956Z" title="Thu Mar 08 2018 21:26:00 GMT+0800 (中国标准时间)" class="time">2018年03月08日</time>阅读 8150# JS中浮点数精度问题<div data-v-0526462d="" data-id="5aa139e8518825558a062e8a" itemprop="articleBody" class="article-content">  最近在做项目的时候，涉及到商品价格的计算，经常会出现计算出现精度问题。刚开始草草了事，直接用toFixed就解决了问题，并没有好好的思考一下这个问题。后来慢慢的，问题越来越多，连toFixed也出现了（允悲），后来经过搜索网上的各种博客和论坛，整理总结了一下。
+[[<div data-v-10f5e1e2="" data-v-762a6aba="" data-v-0526462d="" data-src="https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1" class="lazy avatar avatar loaded" style="background-image: url("https://user-gold-cdn.xitu.io/2017/12/9/1603b5820ac466ee?imageView2/1/w/100/h/100/q/85/format/webp/interlace/1");">]( "")
+        <div data-v-0526462d="" class="author-info-box">
+[谢小飞
+                <a data-v-0ba9b815="" data-v-db47c888="" href="/book/5c90640c5188252d7941f5bb/section/5c9065385188252da6320022" target="_blank" rel="" class="rank">
+![lv-3](https://b-gold-cdn.xitu.io/v3/static/img/lv-3.e108c68.svg "")](/user/580038cebf22ec0064bd0b2d "")](/user/580038cebf22ec0064bd0b2d "")
+            <div data-v-0526462d="" class="meta-box">
+                <time data-v-0526462d="" datetime="2018-03-08T13:26:00.956Z" title="Thu Mar 08 2018 21:26:00 GMT+0800 (中国标准时间)" class="time">
+                    2018年03月08日
+                </time>
+阅读 8150
+
+# JS中浮点数精度问题
+    <div data-v-0526462d="" data-id="5aa139e8518825558a062e8a" itemprop="articleBody" class="article-content">
+  最近在做项目的时候，涉及到商品价格的计算，经常会出现计算出现精度问题。刚开始草草了事，直接用toFixed就解决了问题，并没有好好的思考一下这个问题。后来慢慢的，问题越来越多，连toFixed也出现了（允悲），后来经过搜索网上的各种博客和论坛，整理总结了一下。
 # 问题的发现
   总结了一下，一共有以下两种问题
 ## 浮点数运算后的精度问题
   在计算商品价格加减乘除时，偶尔## 会出现精度问题，一些常见的例子如下：
-```// 加法 =====================
+```
+            // 加法 =====================
 0.1 +0.2 =0.30000000000000004
 0.7 + 0.1 =0.7999999999999999
 0.2 +0.4 =0.6000000000000001
@@ -23,7 +37,8 @@
 复制代码```## toFixed奇葩问题
   在遇到浮点数运算后出现的精度问题时，刚开始我是使用toFixed(2)来解决的，因为在W3school和菜鸟教程（他们均表示这锅不背）上明确写着定义：toFixed()方法可把Number四舍五入为指定小数位数的数字。
   但是在chrome下测试结果不太令人满意：
-```1.35.toFixed(1)// 1.4 正确
+```
+            1.35.toFixed(1)// 1.4 正确
 1.335.toFixed(2)// 1.33  错误
 1.3335.toFixed(3)// 1.333 错误
 1.33335.toFixed(4)// 1.3334 正确
@@ -45,16 +60,19 @@
 ## 浮点数的运算
   那么JavaScript在计算0.1+0.2时到底发生了什么呢？
   首先，十进制的0.1和0.2会被转换成二进制的，但是由于浮点数用二进制表示时是无穷的：
-```0.1 ->0.0001100110011001...(1100循环)
+```
+            0.1 ->0.0001100110011001...(1100循环)
 0.2 ->0.0011001100110011...(0011循环)
 复制代码```  IEEE 754 标准的 64 位双精度浮点数的小数部分最多支持53位二进制位，所以两者相加之后得到二进制为：
-```0.0100110011001100110011001100110011001100110011001100 
+```
+            0.0100110011001100110011001100110011001100110011001100 
 复制代码```  因浮点数小数位的限制而截断的二进制数字，再转换为十进制，就成了0.30000000000000004。所以在进行算术计算时会产生误差。
 # 解决方法
   针对以上两个问题，网上搜了一波解决方法，基本都大同小异的，分别来看一下。
 ## 解决toFixed
   针对toFixed的兼容性问题，我们可以把toFix重写一下来解决，代码如下：
-```// toFixed兼容方法
+```
+            // toFixed兼容方法
 Number.prototype.toFixed =function(len){
 if(len>20 || len<0){
 thrownewRangeError("toFixed() digits argument must be between 0 and 20");
@@ -121,13 +139,15 @@ for(var j = 0;j<need;j++){
 ## 解决浮点数运算精度
   既然我们发现了浮点数的这个问题，又不能直接让两个浮点数运算，那怎么处理呢？
   我们可以把需要计算的数字升级（乘以10的n次幂）成计算机能够精确识别的整数，等计算完成后再进行降级（除以10的n次幂），这是大部分变成语言处理精度问题常用的方法。例如：
-```0.1 +0.2 == 0.3//false
+```
+            0.1 +0.2 == 0.3//false
 (0.1*10 +0.2*10)/10 == 0.3//true
 复制代码```  但是这样就能完美解决么？细心的读者可能在上面的例子里已经发现了问题：
-```35.41 *100 =3540.9999999999995
+```
+            35.41 *100 =3540.9999999999995
 复制代码```  看来进行数字升级也不是完全的可靠啊（允悲）。
   但是魔高一尺道高一丈，这样就能难住我们么，我们可以将浮点数toString后indexOf(".")，记录一下小数位的长度，然后将小数点抹掉，完整的代码如下：
-```/*** method **
+<pre><code class="hljs javascript copyable" lang="javascript">/*** method **
  *  add / subtract / multiply /divide
  * floatObj.add(0.1, 0.2) >> 0.3
  * floatObj.multiply(19.9, 100) >> 1990
@@ -233,5 +253,4 @@ multiply: multiply,
 divide: divide
     }
 }();
-复制代码```  如果觉得floatObj调用麻烦，我们可以在Number.prototype上添加对应的运算方法。
-如果觉得写得还不错，请关注我的[掘金主页](//juejin.im/user/580038cebf22ec0064bd0b2d "")。更多文章请访问[谢小飞的博客](https://acexyf.github.io "")
+```
