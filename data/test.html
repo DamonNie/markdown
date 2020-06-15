@@ -1,43 +1,210 @@
-<div class="post-container">
-    <div class="post-header">
-        <h1 class="post-title">让PHP更快的提供文件下载</h1>
-        <div class="post-byline">Published on <a class="date" href="https://www.laruence.com/2012/05">2 May 2012</a> by <a class="author" href="https://www.laruence.com/author/laruence">laruence</a></div>			</div>
-    <div class="post-content">
+<article class="article fmt article-content" data-id="1190000015612563" data-license="">
 
-        <div class="copyright">
+    <h2 id="item-1"><code>PHP-FPM</code></h2>
+    <p>先来了解一些名词概念：</p>
+    <p><code>CGI</code>是<code>Common Gateway Interface（通用网管协议）</code>，用于让交互程序和Web服务器通信的协议。它负责处理URL的请求，启动一个进程，将客户端发送的数据作为输入，由Web服务器收集程序的输出并加上合适的头部，再发送回客户端。</p>
+    <p><code>FastCGI</code>是基于<code>CGI</code>的增强版本的协议，不同于创建新的进程来服务请求，使用持续的进程和创建的子进程来处理一连串的进程，这些进程由FastCGI服务器管理，开销更小，效率更高。</p>
+    <p><code>PHP-FPM</code>是<code>PHP</code>实现的<code>FastCGI Process Manager(FastCGI进程管理器)</code>, 用于替换<code>PHP FastCGI</code>的大部分附加功能，适用于高负载网站。支持的功能如：</p>
+    <ol>
+        <li>平滑停止/启动的高级进程管理功能</li>
+        <li>慢日志记录脚本</li>
+        <li>动态/静态子进程产生</li>
+        <li>基于php.ini的配置文件</li>
+    </ol>
+    <p><code>PHP-FPM</code>在5.4之后已经整合进入PHP源代码中，提供更好的PHP进程管理方式，可以有效控制内存和进程，平滑重载PHP配置。如果需要使用，在<code>./configure</code>的时候带上<code>-enable-fpm</code>参数即可，使用<code>PHP-FPM</code>来控制<code>FastCGI</code>进程:</p>
+    <div class="widget-codetool" style="display: none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="// 支持start/stop/quit/restart/reload/logrotate参数
+// quit/reload是平滑终止和平滑重新加载，即等现有的服务完成
+./php-fpm --start" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs ruby"><code>/<span class="hljs-regexp">/ 支持start/stop</span><span class="hljs-regexp">/quit/restart</span><span class="hljs-regexp">/reload/logrotate</span>参数
+/<span class="hljs-regexp">/ quit/reload</span>是平滑终止和平滑重新加载，即等现有的服务完成
+./php-fpm --start</code></pre>
+    <h2 id="item-2">
+        <code>PHP-FPM</code> 配置</h2>
+    <p><code>PHP-FPM</code>配置文件为<code>php-fpm.conf</code>，在这个配置文件中我们需要了解一些参数。下面所有的子进程均指<code>php-fpm</code>进程，可以在终端通过<code>ps aux | grep php</code>查看到。</p>
+    <ul>
+        <li>显示<code>php-fpm: pool www</code>的代表work子进程（实际处理请求）</li>
+        <li>显示<code>php-fpm: process master</code>的代表master主进程（负责管理work子进程）</li>
+    </ul>
+    <h3 id="item-2-1">全局配置</h3>
+    <p>先看<code>PHP-FPM</code>最重要的全局配置部分：</p>
+    <h4><code>emergency_restart_threshold</code></h4>
+    <p>如果在<code>emergency_restart_interval</code>设定的时间内收到该参数设定次数的<code>SIGSEGV</code>或<code>SIGBUS</code>退出的信号，则<code>FPM</code>会重新启动。默认值为0，表示关闭该功能。</p>
+    <h4><code>emergency_restart_interval</code></h4>
+    <p>设定平滑重启的间隔时间，有助于解决加速器中共享内存的使用问题。可用单位<code>s(默认)/m/h/d</code>，默认值为0， 表示关闭。</p>
+    <h4><code>process.max</code></h4>
+    <p><code>FPM</code>能够创建的最大子进程数量，它在使用多个<code>pm = dynamic</code>配置的<code>php-fpm pool</code>进程池的时候，控制全局的子进程数量。默认值为0，代表着无限制。</p>
+    <h3 id="item-2-2">进程池配置</h3>
+    <p><code>PHP-FPM</code>的配置其余部分是一个名为<code>Pool Definitions</code>的区域，这个区域的配置设置每个<code>PHP-FPM</code>进程池，进程池中是一系列相关的子进程。这部分开头都是<code>[进程池名称]</code>，如<code>[www]</code>。</p>
+    <p>此时可以解释看到<code>ps aux | grep php</code>中显示的是<code>php-fpm: pool www</code>。</p>
+    <h4><code>pm</code></h4>
+    <p><code>pm</code>指的是<code>process manager</code>，指定进程管理器如何控制子进程的数量，它为必填项，支持3个值：</p>
+    <ul>
+        <li>
+            <code>static</code>: 使用固定的子进程数量，由<code>pm.max_children</code>指定</li>
+        <li>
+            <p><code>dynamic</code>：基于下面的参数动态的调整子进程的数量，至少有一个子进程</p>
             <ul>
-                <!--
+                <li>
+                    <code>pm.max_chidren</code>: 可以同时存活的子进程的最大数量</li>
+                <li>
+                    <code>pm.start_servers</code>: 启动时创建的子进程数量，默认值为<code>min_spare_servers + max_spare_servers - min_spare_servers) / 2</code>
+                </li>
+                <li>
+                    <code>pm.min_spare_servers</code>: 空闲状态的子进程的最小数量，如果不足，新的子进程会被自动创建</li>
+                <li>
+                    <code>pm.max_spare_servers</code>: 空闲状态的子进程的最大数量，如果超过，一些子进程会被杀死</li>
+            </ul>
+        </li>
+        <li>
+            <p><code>ondemand</code>: 启动时不会创建子进程，当新的请求到达时才创建。会使用下面两个参数：</p>
+            <ul>
+                <li><code>pm.max_children</code></li>
+                <li>
+                    <code>pm.process_idle_timeou</code>t 子进程的空闲超时时间，如果超时时间到没有新的请求可以服务，则会被杀死</li>
+            </ul>
+        </li>
+    </ul>
+    <h4><code>pm.max_requests</code></h4>
+    <p>每一个子进程的最大请求服务数量，如果超过了这个值，该子进程会被自动重启。在解决第三方库的内存泄漏问题时，这个参数会很有用。默认值为0，指子进程可以持续不断的服务请求。</p>
+    <h2 id="item-3">
+        <code>PHP-FPM</code>配置优化</h2>
+    <p><code>PHP-FPM</code>管理的方式是一个<code>master</code>主进程，多个<code>pool</code>进程池，多个<code>worker</code>子进程。其中每个进程池监听一个<code>socket</code>套接字。具体的图示：</p>
+    <p><span class="img-wrap"><img referrerpolicy="no-referrer" data-src="/img/bVbdFHy?w=961&amp;h=434" src="https://cdn.segmentfault.com/v-5ee1e5c0/global/img/squares.svg" alt="图片描述" title="图片描述"></span></p>
+    <p>其中的<code>worker</code>子进程实际处理连接请求，<code>master</code>主进程负责管理子进程：</p>
+    <div class="widget-codetool" style="display:none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="1. `master`进程，设置1s定时器，通过`socket`文件监听
+2. 在`pm=dynamic`时，如果`idle worker`数量<`pm.min_spare_servers`，创建新的子进程
+3. 在`pm=dynamic`时，如果`idle worker`数量>`pm.max_spare_servers`，杀死多余的空闲子进程
+4. 在`pm=ondemand`时，如果`idle worker`空闲时间>`pm.process_idle_timeout`，杀死该空闲进程
+5. 当连接到达时，检测如果`worker`数量>`pm.max_children`，打印`warning`日志，退出；如果无异常，使用`idle worker`服务，或者新建`worker`服务
+" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs markdown"><code><span class="hljs-bullet">1. </span><span class="hljs-code">`master`</span>进程，设置1s定时器，通过<span class="hljs-code">`socket`</span>文件监听
+<span class="hljs-bullet">2. </span>在<span class="hljs-code">`pm=dynamic`</span>时，如果<span class="hljs-code">`idle worker`</span>数量<span class="xml"><span class="hljs-tag">&lt;<span class="hljs-name">`pm.min_spare_servers`，创建新的子进程</span>
+<span class="hljs-attr">3.</span> 在`<span class="hljs-attr">pm</span>=<span class="hljs-string">dynamic</span>`时，如果`<span class="hljs-attr">idle</span> <span class="hljs-attr">worker</span>`数量&gt;</span></span><span class="hljs-code">`pm.max_spare_servers`</span>，杀死多余的空闲子进程
+<span class="hljs-bullet">4. </span>在<span class="hljs-code">`pm=ondemand`</span>时，如果<span class="hljs-code">`idle worker`</span>空闲时间&gt;<span class="hljs-code">`pm.process_idle_timeout`</span>，杀死该空闲进程
+<span class="hljs-bullet">5. </span>当连接到达时，检测如果<span class="hljs-code">`worker`</span>数量&gt;<span class="hljs-code">`pm.max_children`</span>，打印<span class="hljs-code">`warning`</span>日志，退出；如果无异常，使用<span class="hljs-code">`idle worker`</span>服务，或者新建<span class="hljs-code">`worker`</span>服务
+</code></pre>
+    <h3 id="item-3-3">保障基本安全</h3>
+    <p>我们为了避免<code>PHP-FPM</code>主进程由于某些糟糕的PHP代码挂掉，需要设置重启的全局配置：</p>
+    <div class="widget-codetool" style="display:none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="; 如果在1min内有10个子进程被中断失效，重启主进程
+emergency_restart_threshold = 10
+emergency_restart_interval = 1m" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs ini"><code><span class="hljs-comment">; 如果在1min内有10个子进程被中断失效，重启主进程</span>
+<span class="hljs-attr">emergency_restart_threshold</span> = <span class="hljs-number">10</span>
+<span class="hljs-attr">emergency_restart_interval</span> = <span class="hljs-number">1</span>m</code></pre>
+    <h3 id="item-3-4">进程数调优</h3>
+    <p>每一个子进程同时只能服务一次连接，所以控制同时存在多少个进程数就很重要，如果过少会导致很多不必要的重建和销毁的开销，如果过多又会占用过多的内存，影响其他服务使用。</p>
+    <p>我们应该测试自己的PHP进程使用多少内存，一般来说刚启动时是8M左右，运行一段时间由于内存泄漏和缓存会上涨到30M左右，所以你需要根据自己的预期内存大小设定进程的数量。同时根据进程池的数量来看一个进程管理器的子进程数量限制。</p>
+    <h4>测试平均PHP子进程占用的内存：</h4>
+    <div class="widget-codetool" style="display:none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ps auxf | grep php | grep -v grep
+work     26829  0.0  0.0 715976  4712 ?        Ss   Jul11   0:00 php-fpm: master process (./etc/php-fpm.conf)
+work     21889  0.0  0.0 729076 29668 ?        S    03:12   0:20  \_ php-fpm: pool www
+work     21273  0.0  0.0 728928 31380 ?        S    03:25   0:21  \_ php-fpm: pool www
+work     15114  0.0  0.0 728052 29084 ?        S    03:40   0:19  \_ php-fpm: pool www
+work     17072  0.0  0.0 728800 34240 ?        S    03:54   0:22  \_ php-fpm: pool www
+work     22763  0.0  0.0 727904 20352 ?        S    11:29   0:04  \_ php-fpm: pool www
+work     38545  0.0  0.0 727796 19484 ?        S    12:34   0:01  \_ php-fpm: pool www
 
-<li>作者: <a href="https://www.laruence.com">Laruence</a>(<a href="http://www.twitter.com/laruence" target="meme" title="Twitter"><img src="/images/ico-twitter.png" /></a> <a href="http://t.sina.com/laruence" target="meme" title="新浪微博"><img src="/images/ico-sina.png" /></a> <a href="http://fusion.google.com/add?feedurl=http://www.laruence.com/feed" target="meme" title="Google阅读器"><img src="/images/ico-google.png" /></a> <a href="mailto:laruence@yahoo.com.cn" target="meme" title="邮件"><img src="/images/ico-mail.png" /></a>)</li>
+// 共占用的内存数量
+$ps auxf | grep php | grep -v grep | grep -v master | awk '{sum+=$6} END {print sum}'
+162712
 
---><p></p>
-                <li>本文地址: <a href="https://www.laruence.com/2012/05/02/2613.html" title="Permanet Link to 让PHP更快的提供文件下载">https://www.laruence.com/2012/05/02/2613.html</a></li>
+// 所有的子进程数量
+$ ps auxf | grep php | grep -v grep | grep -v master | wc -l
+6" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs yaml"><code><span class="hljs-string">$ps</span> <span class="hljs-string">auxf</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">php</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">-v</span> <span class="hljs-string">grep</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">26829</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">715976</span>  <span class="hljs-number">4712</span> <span class="hljs-string">?</span>        <span class="hljs-attr">Ss   Jul11   0:00 php-fpm:</span> <span class="hljs-string">master</span> <span class="hljs-string">process</span> <span class="hljs-string">(./etc/php-fpm.conf)</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">21889</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">729076</span> <span class="hljs-number">29668</span> <span class="hljs-string">?</span>        <span class="hljs-string">S</span>    <span class="hljs-number">03</span><span class="hljs-string">:12</span>   <span class="hljs-number">0</span><span class="hljs-string">:20</span>  <span class="hljs-string">\_</span> <span class="hljs-attr">php-fpm:</span> <span class="hljs-string">pool</span> <span class="hljs-string">www</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">21273</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">728928</span> <span class="hljs-number">31380</span> <span class="hljs-string">?</span>        <span class="hljs-string">S</span>    <span class="hljs-number">03</span><span class="hljs-string">:25</span>   <span class="hljs-number">0</span><span class="hljs-string">:21</span>  <span class="hljs-string">\_</span> <span class="hljs-attr">php-fpm:</span> <span class="hljs-string">pool</span> <span class="hljs-string">www</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">15114</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">728052</span> <span class="hljs-number">29084</span> <span class="hljs-string">?</span>        <span class="hljs-string">S</span>    <span class="hljs-number">03</span><span class="hljs-string">:40</span>   <span class="hljs-number">0</span><span class="hljs-string">:19</span>  <span class="hljs-string">\_</span> <span class="hljs-attr">php-fpm:</span> <span class="hljs-string">pool</span> <span class="hljs-string">www</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">17072</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">728800</span> <span class="hljs-number">34240</span> <span class="hljs-string">?</span>        <span class="hljs-string">S</span>    <span class="hljs-number">03</span><span class="hljs-string">:54</span>   <span class="hljs-number">0</span><span class="hljs-string">:22</span>  <span class="hljs-string">\_</span> <span class="hljs-attr">php-fpm:</span> <span class="hljs-string">pool</span> <span class="hljs-string">www</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">22763</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">727904</span> <span class="hljs-number">20352</span> <span class="hljs-string">?</span>        <span class="hljs-string">S</span>    <span class="hljs-number">11</span><span class="hljs-string">:29</span>   <span class="hljs-number">0</span><span class="hljs-string">:04</span>  <span class="hljs-string">\_</span> <span class="hljs-attr">php-fpm:</span> <span class="hljs-string">pool</span> <span class="hljs-string">www</span>
+<span class="hljs-string">work</span>     <span class="hljs-number">38545</span>  <span class="hljs-number">0.0</span>  <span class="hljs-number">0.0</span> <span class="hljs-number">727796</span> <span class="hljs-number">19484</span> <span class="hljs-string">?</span>        <span class="hljs-string">S</span>    <span class="hljs-number">12</span><span class="hljs-string">:34</span>   <span class="hljs-number">0</span><span class="hljs-string">:01</span>  <span class="hljs-string">\_</span> <span class="hljs-attr">php-fpm:</span> <span class="hljs-string">pool</span> <span class="hljs-string">www</span>
 
-                <li>转载请注明出处 </li>
-            </ul></div>
-        <p>
-            一般来说, 我们可以通过直接让URL指向一个位于Document Root下面的文件, 来引导用户下载文件.<br>
-            但是, 这样做, 就没办法做一些统计, 权限检查, 等等的工作.  于是,  很多时候,  我们采用让PHP来做转发, 为用户提供文件下载.</p>
-        <pre name="code" class="sh_php sh_sourceCode" linenum="off"><ol><li><span class="sh_symbol">&lt;?php</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$file</span> <span class="sh_symbol">=</span> <span class="sh_string">"/tmp/dummy.tar.gz"</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-type: application/octet-stream"</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">'Content-Disposition: attachment; filename="'</span> <span class="sh_symbol">.</span> <span class="sh_function">basename</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">)</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-Length: "</span><span class="sh_symbol">.</span> <span class="sh_function">filesize</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">))</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">readfile</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">)</span>;</li></ol></pre>
-        <p>     但是这个有一个问题, 就是如果文件是中文名的话, 有的用户可能下载后的文件名是乱码.<br>
-            于是, 我们做一下修改(参考: :</p>
-        <pre name="code" class="sh_php sh_sourceCode" linenum="off"><ol><li><span class="sh_symbol">&lt;?php</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$file</span> <span class="sh_symbol">=</span> <span class="sh_string">"/tmp/中文名.tar.gz"</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$filename</span> <span class="sh_symbol">=</span> <span class="sh_function">basename</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-type: application/octet-stream"</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_comment">//处理中文文件名</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$ua</span> <span class="sh_symbol">=</span> <span class="sh_variable">$_SERVER</span><span class="sh_symbol">[</span><span class="sh_string">"HTTP_USER_AGENT"</span><span class="sh_symbol">]</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$encoded_filename</span> <span class="sh_symbol">=</span> <span class="sh_function">rawurlencode</span><span class="sh_symbol">(</span><span class="sh_variable">$filename</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_statement">if</span> <span class="sh_symbol">(</span><span class="sh_function">preg_match</span><span class="sh_symbol">(</span><span class="sh_string">"/MSIE/"</span>, <span class="sh_variable">$ua</span><span class="sh_symbol">))</span> <span class="sh_symbol">{</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">'Content-Disposition: attachment; filename="'</span> <span class="sh_symbol">.</span> <span class="sh_variable">$encoded_filename</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_symbol">}</span> <span class="sh_keyword">else</span> <span class="sh_statement">if</span> <span class="sh_symbol">(</span><span class="sh_function">preg_match</span><span class="sh_symbol">(</span><span class="sh_string">"/Firefox/"</span>, <span class="sh_variable">$ua</span><span class="sh_symbol">))</span> <span class="sh_symbol">{</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-Disposition: attachment; filename*=\"utf8''"</span> <span class="sh_symbol">.</span> <span class="sh_variable">$filename</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_symbol">}</span> <span class="sh_keyword">else</span> <span class="sh_symbol">{</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">'Content-Disposition: attachment; filename="'</span> <span class="sh_symbol">.</span> <span class="sh_variable">$filename</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_symbol">}</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-Length: "</span><span class="sh_symbol">.</span> <span class="sh_function">filesize</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">))</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">readfile</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">)</span>;</li></ol></pre>
-        <p>    恩, 现在看起来好多了, 不过还有一个问题,  那就是readfile,  虽然PHP的readfile尝试实现的尽量高效, 不占用PHP本身的内存, 但是实际上它还是需要采用MMAP(如果支持), 或者是一个固定的buffer去循环读取文件, 直接输出.<br>
-            输出的时候, 如果是Apache + PHP mod, 那么还需要发送到Apache的输出缓冲区. 最后才发送给用户. 而对于Nginx + fpm如果他们分开部署的话, 那还会带来额外的网络IO.<br>
-            那么, 能不能不经过PHP这层, 直接让Webserver直接把文件发送给用户呢?<br>
-            今天, 我看到了一个有意思的文章: <a href="http://www.jasny.net/articles/how-i-php-x-sendfile/">How I PHP: X-SendFile</a>.<br>
-            我们可以使用Apache的module <a href="https://tn123.org/mod_xsendfile/">mod_xsendfile</a>, 让Apache直接发送这个文件给用户:</p>
-        <pre name="code" class="sh_php sh_sourceCode" linenum="off"><ol><li><span class="sh_symbol">&lt;?php</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$file</span> <span class="sh_symbol">=</span> <span class="sh_string">"/tmp/中文名.tar.gz"</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$filename</span> <span class="sh_symbol">=</span> <span class="sh_function">basename</span><span class="sh_symbol">(</span><span class="sh_variable">$file</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-type: application/octet-stream"</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_comment">//处理中文文件名</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$ua</span> <span class="sh_symbol">=</span> <span class="sh_variable">$_SERVER</span><span class="sh_symbol">[</span><span class="sh_string">"HTTP_USER_AGENT"</span><span class="sh_symbol">]</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_variable">$encoded_filename</span> <span class="sh_symbol">=</span> <span class="sh_function">rawurlencode</span><span class="sh_symbol">(</span><span class="sh_variable">$filename</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_statement">if</span> <span class="sh_symbol">(</span><span class="sh_function">preg_match</span><span class="sh_symbol">(</span><span class="sh_string">"/MSIE/"</span>, <span class="sh_variable">$ua</span><span class="sh_symbol">))</span> <span class="sh_symbol">{</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">'Content-Disposition: attachment; filename="'</span> <span class="sh_symbol">.</span> <span class="sh_variable">$encoded_filename</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_symbol">}</span> <span class="sh_keyword">else</span> <span class="sh_statement">if</span> <span class="sh_symbol">(</span><span class="sh_function">preg_match</span><span class="sh_symbol">(</span><span class="sh_string">"/Firefox/"</span>, <span class="sh_variable">$ua</span><span class="sh_symbol">))</span> <span class="sh_symbol">{</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"Content-Disposition: attachment; filename*=\"utf8''"</span> <span class="sh_symbol">.</span> <span class="sh_variable">$filename</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_symbol">}</span> <span class="sh_keyword">else</span> <span class="sh_symbol">{</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">'Content-Disposition: attachment; filename="'</span> <span class="sh_symbol">.</span> <span class="sh_variable">$filename</span> <span class="sh_symbol">.</span> <span class="sh_string">'"'</span><span class="sh_symbol">)</span>;</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_symbol">}</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_comment">//让Xsendfile发送文件</span></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<span class="sh_function">header</span><span class="sh_symbol">(</span><span class="sh_string">"X-Sendfile: $file"</span><span class="sh_symbol">)</span>;</li></ol></pre>
-        <p>    X-Sendfile头将被Apache处理, 并且把响应的文件直接发送给Client.<br>
-            Lighttpd和Nginx也有类似的模块,  大家有兴趣的可以去找找看 <img draggable="false" role="img" class="emoji" alt="🙂" src="https://s.w.org/images/core/emoji/12.0.0-1/svg/1f642.svg"><script type="text/javascript" src="https://www.laruence.com/wp-content/plugins/shjs-syntax-hiliter/shjs/lang/sh_php.js"></script></p>
-    </div>
-    <div class="post-meta">
-        <div class="post-categories"><span>Filed in </span><a href="https://www.laruence.com/category/php-usage" title="View all posts in PHP应用">PHP应用</a></div>				<div class="post-tags"><ul><li><a href="https://www.laruence.com/tag/php" title="View all posts tagged PHP">PHP</a></li><li><a href="https://www.laruence.com/tag/xsendfile" title="View all posts tagged Xsendfile">Xsendfile</a></li><li><a href="https://www.laruence.com/tag/%e4%b8%8b%e8%bd%bd%e6%96%87%e4%bb%b6" title="View all posts tagged 下载文件">下载文件</a></li><li><a href="https://www.laruence.com/tag/%e4%b8%ad%e6%96%87%e6%96%87%e4%bb%b6%e5%90%8d" title="View all posts tagged 中文文件名">中文文件名</a></li></ul></div>				<nav class="further-reading">
-        <div class="previous">
-            <span>Previous Post</span>
-            <a href="https://www.laruence.com/2012/04/30/2594.html" rel="prev">如何为PHP贡献代码</a>	</div>
-        <div class="next">
-            <span>Next Post</span>
-            <a href="https://www.laruence.com/2012/06/14/2628.html" rel="next">PHP的Calling Scope</a>	</div>
-    </nav>			</div>
-</div>
+<span class="hljs-string">//</span> <span class="hljs-string">共占用的内存数量</span>
+<span class="hljs-string">$ps</span> <span class="hljs-string">auxf</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">php</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">-v</span> <span class="hljs-string">grep</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">-v</span> <span class="hljs-string">master</span> <span class="hljs-string">|</span> <span class="hljs-string">awk</span> <span class="hljs-string">'{sum+=$6} END {print sum}'</span>
+<span class="hljs-number">162712</span>
+
+<span class="hljs-string">//</span> <span class="hljs-string">所有的子进程数量</span>
+<span class="hljs-string">$</span> <span class="hljs-string">ps</span> <span class="hljs-string">auxf</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">php</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">-v</span> <span class="hljs-string">grep</span> <span class="hljs-string">|</span> <span class="hljs-string">grep</span> <span class="hljs-string">-v</span> <span class="hljs-string">master</span> <span class="hljs-string">|</span> <span class="hljs-string">wc</span> <span class="hljs-string">-l</span>
+<span class="hljs-number">6</span></code></pre>
+    <p>可以看到第6列，每一个子进程的内存占用大概在19-34M之间（单位为KB）。平均的内存占用为<code>162712KB/6 = 27.1M</code>。</p>
+    <h4>查看服务器总的内存大小</h4>
+    <div class="widget-codetool" style="display:none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="$ free -g
+             total       used       free     shared    buffers     cached
+Mem:           157        141         15          0          4        123
+-/+ buffers/cache:         13        143
+Swap:            0          0          0" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs yaml"><code><span class="hljs-string">$</span> <span class="hljs-string">free</span> <span class="hljs-string">-g</span>
+             <span class="hljs-string">total</span>       <span class="hljs-string">used</span>       <span class="hljs-string">free</span>     <span class="hljs-string">shared</span>    <span class="hljs-string">buffers</span>     <span class="hljs-string">cached</span>
+<span class="hljs-attr">Mem:</span>           <span class="hljs-number">157</span>        <span class="hljs-number">141</span>         <span class="hljs-number">15</span>          <span class="hljs-number">0</span>          <span class="hljs-number">4</span>        <span class="hljs-number">123</span>
+<span class="hljs-string">-/+</span> <span class="hljs-attr">buffers/cache:</span>         <span class="hljs-number">13</span>        <span class="hljs-number">143</span>
+<span class="hljs-attr">Swap:</span>            <span class="hljs-number">0</span>          <span class="hljs-number">0</span>          <span class="hljs-number">0</span></code></pre>
+    <p>可以看出我的服务器总得内存大小是157G（-g采用了G的单位）。</p>
+    <h4>进程数限制</h4>
+    <p>此时如果我们分配全部的内存给<code>PHP-FPM</code>使用，那么进程数可以限制在<code>157000/27 = 5814</code>,但是由于我的服务器同时服务了很多内容，所以我们可以向下调整到512个进程数：</p>
+    <div class="widget-codetool" style="display:none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="process.max = 512
+pm = dynamic
+pm.max_children = 512
+pm.start_servers = 16
+pm.min_spare_servers = 8
+pm.max_spare_serveres = 30
+" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs ini"><code><span class="hljs-attr">process.max</span> = <span class="hljs-number">512</span>
+<span class="hljs-attr">pm</span> = dynamic
+<span class="hljs-attr">pm.max_children</span> = <span class="hljs-number">512</span>
+<span class="hljs-attr">pm.start_servers</span> = <span class="hljs-number">16</span>
+<span class="hljs-attr">pm.min_spare_servers</span> = <span class="hljs-number">8</span>
+<span class="hljs-attr">pm.max_spare_serveres</span> = <span class="hljs-number">30</span>
+</code></pre>
+    <h3 id="item-3-5">防止内存泄漏</h3>
+    <p>由于糟糕的插件和库，内存泄漏时有发生，所以我们需要对每一个子进程服务的请求数量做限制，防止无限制的内存泄漏：</p>
+    <div class="widget-codetool" style="display:none;">
+        <div class="widget-codetool--inner">
+            <span class="selectCode code-tool" data-toggle="tooltip" data-placement="top" title="" data-original-title="全选"></span>
+            <span type="button" class="copyCode code-tool" data-toggle="tooltip" data-placement="top" data-clipboard-text="pm.max_requests = 1000" title="" data-original-title="复制"></span>
+        </div>
+    </div><pre class="hljs ini"><code style="word-break: break-word; white-space: initial;"><span class="hljs-attr">pm.max_requests</span> = <span class="hljs-number">1000</span></code></pre>
+    <h3 id="item-3-6">重启</h3>
+    <p>如果上面的配置都按照你的实际需求和环境配置好了，不要忘记重启<code>PHP-FPM</code>服务。</p>
+    <h2 id="item-4">参考资料</h2>
+    <ol>
+        <li>PHP手册-FastCGI: <a href="http://php.net/manual/zh/install.fpm.php" rel="nofollow noreferrer" target="_blank">http://php.net/manual/zh/inst...</a>
+        </li>
+        <li>维基百科-CGI：<a href="https://zh.wikipedia.org/wiki/%E9%80%9A%E7%94%A8%E7%BD%91%E5%85%B3%E6%8E%A5%E5%8F%A3" rel="nofollow noreferrer" target="_blank">https://zh.wikipedia.org/wiki...</a>
+        </li>
+        <li>维基百科-FastCGI：<a href="https://zh.wikipedia.org/wiki/FastCGI" rel="nofollow noreferrer" target="_blank">https://zh.wikipedia.org/wiki...</a>
+        </li>
+        <li>博客园 php-fpm进程数优化：<a href="https://www.cnblogs.com/52fhy/p/5051722.html" rel="nofollow noreferrer" target="_blank">https://www.cnblogs.com/52fhy...</a>
+        </li>
+        <li>简书 php-fpm进程管理：<a href="https://www.jianshu.com/p/c9a028c834ff" rel="nofollow noreferrer" target="_blank">https://www.jianshu.com/p/c9a...</a>
+        </li>
+        <li>PHP手册 php-fpm.conf：<a href="http://php.net/manual/zh/install.fpm.configuration.php" rel="nofollow noreferrer" target="_blank">http://php.net/manual/zh/inst...</a>
+        </li>
+        <li>《Modern PHP》 第七章 PHP-FPM</li>
+    </ol>
+
+</article>
