@@ -13,13 +13,6 @@ namespace damon\src;
 
 class HtmlMarkdown extends Parse
 {
-    private $element;
-
-    public function setElement($element)
-    {
-        $this->element = $element;
-        return $this;
-    }
 
     /**
      * 前置处理函数
@@ -64,7 +57,7 @@ class HtmlMarkdown extends Parse
         return trim($this->element);
     }
 
-    protected function parse()
+    public function parse()
     {
         $pattern_array = [
             //统一处理去掉外层html元素的情况
@@ -79,6 +72,7 @@ class HtmlMarkdown extends Parse
             ["#[ ]*<path[^>]*?>(.*?)</path>#is", '$1', '</path>'],
             ["#[ ]*<caption[^>]*?>(.*?)</caption>#is", '$1', '</caption>'],
             ["#[ ]*<button[^>]*?>(.*?)</button>#is", '$1', '</button>'],
+            ["#[ ]*<section[^>]*?>(.*?)</section>#is", '$1', '</section>'],
             //处理p code标签
             ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```
             $2```", '</code></pre>'],

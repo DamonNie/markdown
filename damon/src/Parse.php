@@ -11,8 +11,21 @@
 namespace damon\src;
 
 
-abstract class Parse
+abstract class Parse implements Base
 {
+    protected $element;
+
+    public function setElement($element)
+    {
+        $this->element = $element;
+        return $this;
+    }
+
+    public function toString()
+    {
+        return trim($this->element);
+    }
+
     public function __call($method, $args)
     {
         if (method_exists($this, $method)) {
@@ -24,39 +37,5 @@ abstract class Parse
         } else {
             throw new \Exception('method:' . $method . ' not exist');
         }
-    }
-
-    protected function test()
-    {
-        echo 'parse';
-    }
-
-    protected function _init()
-    {
-    }
-
-    /**
-     * 前置处理函数
-     */
-    protected function _before()
-    {
-        echo 'before...';
-    }
-
-    /**
-     * 获取一个元素值
-     */
-
-    public function getBlock()
-    {
-
-    }
-
-    /**
-     * 是否是一个元素
-     */
-    public function isBlock($element, $start)
-    {
-
     }
 }

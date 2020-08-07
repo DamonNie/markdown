@@ -47,6 +47,13 @@ class Convert
             case 'html_markdown':
                 $this->content = (new HtmlMarkdown())->setElement($this->content)->parse()->toString();
                 break;
+            case 'custom':
+                //加密
+                $this->content = (new Custom())->setElement($this->content)->clearChinese()->encrypt(15)->toString();
+//                $this->content = (new Custom())->setElement($this->content)->encrypt(10)->toString();
+                //解密
+//                $this->content = (new Custom())->setElement($this->content)->decode(10)->toString();
+                break;
             default:
                 throw new \Exception('format error');
                 break;
@@ -70,10 +77,5 @@ class Convert
         return file_put_contents($path, $this->content);
     }
 
-    public function __call($name, $args)
-    {
-        echo "run __call";
-        exit;
-    }
 
 }

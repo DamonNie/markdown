@@ -12,5 +12,6 @@ foreach ($path_arr as $value) {
     $path = __DIR__ . '/data/' . $value . '.html';
     $md_path = __DIR__ . '/data/' . $value . '.md';
     Convert::getInstance()->getContent($path)->format('html_markdown')->put($md_path);
+//    Convert::getInstance()->getContent($path)->format('custom')->put($md_path);
 }
 
