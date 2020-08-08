@@ -11,8 +11,39 @@ require_once "./vendor/autoload.php";
 
 
 use damon\src\ext\File;
+use damon\src\Custom;
+$input = "<?php
+/**
+ * Created by PhpStorm.
+ * User: Damon
+ * Date: 2017/7/3
+ * Time: 11:12
+ */
+//增加一个入口常量，用于判断是否有权限直接进入其它文件
+define('ACCESS', TRUE);
+//加载初始化类
+include_once 'Core/Common/functions.php';
+include_once 'Core/App.class.php';
+//进入到初始化类
+\Core\App::run();    //由于采用命名空间，因此访问类的时候必须带上空间";
+$str = preg_match_all("/([\x{4e00}-\x{9fa5}])/u", $input, $match);
+//print_r($match);
+//print_r($str);
+//$path = 'C:\damon\phpwork\demo\markdown\yii+vue';
+//$data = (new File())->generateEncryptFiles($path,'');
+//$path = 'C:\damon\phpwork\demo\markdown\yii+vuecopy';
+//$data = (new File())->generateDecryptFiles($path);
 
-$path = 'C:/damon/phpwork/demo/damon';
-$data = (new File())->generateEncryptFiles($path);
-$path = 'C:/damon/phpwork/demo/damoncopy';
-$data = (new File())->generateDecryptFiles($path);
+$test = '测试专用';
+$test1 = (new Custom())->strToAscii($test);
+$test2 = (new Custom())->asciiToStr($test1);
+print_r($test1);
+print_r($test2);
+//echo PHP_EOL.PHP_EOL.PHP_EOL;
+//echo PHP_EOL.PHP_EOL.PHP_EOL;
+//echo PHP_EOL.PHP_EOL.PHP_EOL;
+//
+//$test3 = (new Custom())->unicodeEncode($input);
+//$test4 = (new Custom())->unicodeDecode($test3);
+//print_r($test3);
+//print_r($test4);

@@ -87,7 +87,7 @@ class Custom extends Parse
             $currentOffset = $currentOffset >= $patternCount ? $currentOffset - $patternCount : $currentOffset;
             $this->pattern[chr($value)] = chr($patternRange[$currentOffset]);
         }
-        $this->chinesePattern = '/([\x{4e00}-\x{9fa5}])/u';
+//        $this->chinesePattern = '/([\x{4e00}-\x{9fa5}])/u';
         return $this;
     }
 
@@ -128,6 +128,113 @@ class Custom extends Parse
     {
         $this->element = preg_replace($this->chinesePattern, '', $this->element);
         return $this;
+    }
+
+    public function encodeChinese()
+    {
+        if (preg_match_all($this->chinesePattern, $this->element, $match)) {
+            $pattern = [];
+            foreach ($match[0] as $value) {
+                $pattern[$value] = '{{' . $this->strToAscii($value) . '}}';
+            }
+            $this->element = strtr($this->element, $pattern);
+        }
+        return $this;
+    }
+
+    public function decodeChinese()
+    {
+        $tmpPattern = '/{{(.*)}}/';
+        if (preg_match_all($tmpPattern, $this->element, $match)) {
+            $pattern = [];
+            foreach ($match[0] as $value) {
+                $decodeArray = explode('}}', $value);
+                $microMatch = [];
+                foreach ($decodeArray as $vv) {
+                    $tmpStr = strstr($vv, '{{') . '}}';
+                    $decodeStr = strstr($vv, '{{');
+                    $decodeStr = str_replace('{{', '', $decodeStr);
+                    if (!$decodeStr) {
+                        continue;
+                    }
+                    $microMatch[$tmpStr] = $this->asciiToStr($decodeStr);
+                }
+                $pattern[$value] = strtr($value, $microMatch);
+            }
+            $this->element = strtr($this->element, $pattern);
+        }
+        return $this;
+    }
+
+    /**
+     * 中文字符转化为ASCII码
+     * @param $str
+     * @return string
+     */
+    public function strToAscii($str)
+    {
+        $encode = mb_detect_encoding($str, ['ASCII', 'UTF-8', 'GB2312', "GBK", 'BIG5']);
+        $str = mb_convert_encoding($str, 'GB2312', $encode);
+        $change_after = '';
+        for ($i = 0; $i < strlen($str); $i++) {
+            $temp_str = dechex(ord($str[$i]));
+            $change_after .= $temp_str[1] . $temp_str[0];
+        }
+        return strtoupper($change_after);
+    }
+
+    /**
+     * ASCII码转化为中文字符
+     * @param $asc_arr
+     * @return bool|false|string|string[]|null
+     */
+    public function asciiToStr($asc_arr)
+    {
+        $asc_arr = str_split(strtolower($asc_arr), 2);
+        $str = '';
+        $count = count($asc_arr);
+        for ($i = 0; $i < $count; $i++) {
+            $str .= chr(hexdec($asc_arr[$i][1] . $asc_arr[$i][0]));
+        }
+        $encode = mb_detect_encoding($str, ['ASCII', 'UTF-8', 'GB2312', "GBK", 'BIG5']);
+        return mb_convert_encoding($str, 'UTF-8', $encode);
+    }
+
+    /**
+     * @param string $encoding 原始字符串的编码，默认GBK
+     * @param string $prefix 编码后的前缀，默认"&#"
+     * @param string $postfix 编码后的后缀，默认";"
+     */
+    function unicodeEncode($str, $prefix = '&#', $postfix = ';')
+    {
+        $encode = mb_detect_encoding($str, ['ASCII', 'UTF-8', 'GB2312', "GBK", 'BIG5']);
+        $str = mb_convert_encoding($str, 'UCS-2', $encode);
+        $arrstr = str_split($str, 2);
+        $unistr = '';
+        for ($i = 0, $len = count($arrstr); $i < $len; $i++) {
+            $dec = hexdec(bin2hex($arrstr[$i]));
+            $unistr .= $prefix . $dec . $postfix;
+        }
+        return $unistr;
+    }
+
+    /**
+     * @param string $encoding 原始字符串的编码，默认GBK
+     * @param string $prefix 编码字符串的前缀，默认"&#"
+     * @param string $postfix 编码字符串的后缀，默认";"
+     */
+    function unicodeDecode($arruni, $prefix = '&#', $postfix = ';')
+    {
+        $arruni = explode($prefix, $arruni);
+        $unistr = '';
+        for ($i = 1, $len = count($arruni); $i < $len; $i++) {
+            if (strlen($postfix) > 0) {
+                $arruni[$i] = substr($arruni[$i], 0, strlen($arruni[$i]) - strlen($postfix));
+            }
+            $temp = intval($arruni[$i]);
+            $unistr .= ($temp < 256) ? chr(0) . chr($temp) : chr($temp / 256) . chr($temp % 256);
+        }
+        return mb_convert_encoding($unistr, 'UTF-8', 'UCS-2');
     }
 
 }

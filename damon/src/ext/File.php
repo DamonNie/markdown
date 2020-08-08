@@ -124,7 +124,7 @@ class File
                 } else {
                     if ($fl != '.' && $fl != '..') {
                         $fileContent = file_get_contents($temp);
-                        $copyContent = $custom->setPattern(1)->setElement($fileContent)->encrypt($this->encryptCount)->toString();
+                        $copyContent = $custom->setPattern(1)->setElement($fileContent)->encrypt($this->encryptCount)->encodeChinese()->toString();
                         file_put_contents($copyTemp, $copyContent);
                     }
                 }
@@ -158,7 +158,7 @@ class File
                 } else {
                     if ($fl != '.' && $fl != '..') {
                         $fileContent = file_get_contents($temp);
-                        $copyContent = $custom->setPattern(1)->setElement($fileContent)->decrypt($this->encryptCount)->toString();
+                        $copyContent = $custom->setPattern(1)->setElement($fileContent)->decodeChinese()->decrypt($this->encryptCount)->toString();
                         file_put_contents($copyTemp, $copyContent);
                     }
                 }
@@ -172,4 +172,5 @@ class File
             mkdir($dir, 0777, true);
         }
     }
+
 }
