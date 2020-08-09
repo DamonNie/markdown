@@ -137,6 +137,7 @@ class File
         if (!is_dir($dir))
             return false;
         if (!$copyDir) {
+            $copyDir = $dir;
             if(strpos($dir,'copy') !== false){
                 $copyDir = str_replace('copy','',$dir);
             }

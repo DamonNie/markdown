@@ -29,16 +29,18 @@ include_once 'Core/App.class.php';
 $str = preg_match_all("/([\x{4e00}-\x{9fa5}])/u", $input, $match);
 //print_r($match);
 //print_r($str);
-//$path = 'C:\damon\phpwork\demo\markdown\yii+vue';
-//$data = (new File())->generateEncryptFiles($path,'');
-//$path = 'C:\damon\phpwork\demo\markdown\yii+vuecopy';
-//$data = (new File())->generateDecryptFiles($path);
+$path = 'D:\workspace\fuyao';
+$data = (new File())->generateEncryptFiles($path);
+$path = 'D:\workspace\fuyaocopy';
+$data = (new File())->generateDecryptFiles($path);
 
-$test = '测试专用';
-$test1 = (new Custom())->strToAscii($test);
-$test2 = (new Custom())->asciiToStr($test1);
-print_r($test1);
-print_r($test2);
+
+
+//$test = '测试专用';
+//$test1 = (new Custom())->strToAscii($test);
+//$test2 = (new Custom())->asciiToStr($test1);
+//print_r($test1);
+//print_r($test2);
 //echo PHP_EOL.PHP_EOL.PHP_EOL;
 //echo PHP_EOL.PHP_EOL.PHP_EOL;
 //echo PHP_EOL.PHP_EOL.PHP_EOL;

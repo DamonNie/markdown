@@ -130,19 +130,28 @@ class Custom extends Parse
         return $this;
     }
 
-    public function encodeChinese()
+    public function encodeChinese($mode = 'ascii')
     {
         if (preg_match_all($this->chinesePattern, $this->element, $match)) {
             $pattern = [];
             foreach ($match[0] as $value) {
-                $pattern[$value] = '{{' . $this->strToAscii($value) . '}}';
+                switch ($mode) {
+                    case 'ascii':
+                        $pattern[$value] = '{{' . $this->strToAscii($value) . '}}';
+                        break;
+                    case 'unicode':
+                        $pattern[$value] = '{{' . $this->unicodeEncode($value) . '}}';
+                        break;
+                    default:
+                        break;
+                }
             }
             $this->element = strtr($this->element, $pattern);
         }
         return $this;
     }
 
-    public function decodeChinese()
+    public function decodeChinese($mode = 'ascii')
     {
         $tmpPattern = '/{{(.*)}}/';
         if (preg_match_all($tmpPattern, $this->element, $match)) {
@@ -157,7 +166,16 @@ class Custom extends Parse
                     if (!$decodeStr) {
                         continue;
                     }
-                    $microMatch[$tmpStr] = $this->asciiToStr($decodeStr);
+                    switch ($mode) {
+                        case 'ascii':
+                            $microMatch[$tmpStr] = $this->asciiToStr($decodeStr);
+                            break;
+                        case 'unicode':
+                            $microMatch[$tmpStr] = $this->unicodeDecode($decodeStr);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 $pattern[$value] = strtr($value, $microMatch);
             }
@@ -188,16 +206,14 @@ class Custom extends Parse
      * @param $asc_arr
      * @return bool|false|string|string[]|null
      */
-    public function asciiToStr($asc_arr)
+    public function asciiToStr($asc_str)
     {
-        $asc_arr = str_split(strtolower($asc_arr), 2);
+        $asc_arr = str_split(strtolower($asc_str), 2);
         $str = '';
-        $count = count($asc_arr);
-        for ($i = 0; $i < $count; $i++) {
-            $str .= chr(hexdec($asc_arr[$i][1] . $asc_arr[$i][0]));
+        for ($i = 0; $i < count($asc_arr); $i++) {
+            $str .= chr(hexdec(@$asc_arr[$i][1] . @$asc_arr[$i][0]));
         }
-        $encode = mb_detect_encoding($str, ['ASCII', 'UTF-8', 'GB2312', "GBK", 'BIG5']);
-        return mb_convert_encoding($str, 'UTF-8', $encode);
+        return mb_convert_encoding($str, 'UTF-8', 'GB2312');
     }
 
     /**
