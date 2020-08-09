@@ -29,9 +29,9 @@ include_once 'Core/App.class.php';
 $str = preg_match_all("/([\x{4e00}-\x{9fa5}])/u", $input, $match);
 //print_r($match);
 //print_r($str);
-$path = 'D:\workspace\fuyao';
+$path = 'D:\workspace\markdown';
 $data = (new File())->generateEncryptFiles($path);
-$path = 'D:\workspace\fuyaocopy';
+$path = 'D:\workspace\markdowncopy';
 $data = (new File())->generateDecryptFiles($path);
 
 
