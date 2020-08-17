@@ -1,177 +1,21 @@
-<?php
-/**
- * @created by PhpStorm loan
- * @author damon
- * @date 2020/8/6
- * @time 11:01
- * JUST do it,so what have you done today
- *
- */
+# 什么时候应该使用“静态类”而不使用单例？
 
-namespace damon\src\ext;
 
-use damon\src\Custom;
+经常我们都会使用单例，而有时候我们又会贪图方便而使用一个类然后全部都使用静态方法。那么，到底什么时候我们才应该使用这种都是静态方法的类呢(注：java没有静态类)？
 
-class File
-{
-    private $encryptCount = 0;
 
-    public function __construct()
-    {
-        $this->encryptCount = 10;
-}
+1.  所有方法都是一些工具类的方法，如`Math`类
+2.  不希望被gc回收又不想自己去处理实例。
+3.  很确定这个类将来也不会是有状态的（stateful）而且你确定你不需要多个实例。
+        
 
-/**
-* @param $folder
-* @param bool $ergodic
-* @return array
-*/
-public function getFolderFiles($dir, $ignore = '.git')
-{
-$data = [];
-//首先先读取文件夹
-if (!is_dir($dir))
-return false;
-$handle = opendir($dir);  //opendir()函数的作用是：打开目录句柄
-//每次使用readdir后，readdir会读到下一个文件，readdir是依次读出目录中的所有文件，每次只能读一个
-if ($handle) {
-while (($fl = readdir($handle)) !== false) {
-$temp = $dir . DIRECTORY_SEPARATOR . $fl;
-//如果不加  $fl!='.' && $fl != '..'  则会造成把$dir的父级目录也读取出来
-if ($fl != $ignore && $ignore) {
-if (is_dir($temp) && $fl != '.' && $fl != '..') {
-//                    echo '目录：' . $temp . '
-';
-$data[$fl] = $this->getFolderFiles($temp);
-} else {
-if ($fl != '.' && $fl != '..') {
-//                        echo '文件：' . $temp . '
-';
-$data[] = $fl;
-}
-}
-}
-}
-}
-return $data;
-}
 
-/**
-* 复制文件
-* @param $dir
-* @param string $copyDir
-* @param string $ignore
-* @return bool
-*/
-public function generateFiles($dir, $copyDir = '', $ignore = '.git')
-{
-if (!is_dir($dir))
-return false;
-$copyDir = $copyDir ? $copyDir : $dir . 'copy';
-//防止子目录也一起被复制
-$this->createDir($copyDir);
-$handle = opendir($dir);  //opendir()函数的作用是：打开目录句柄
-//每次使用readdir后，readdir会读到下一个文件，readdir是依次读出目录中的所有文件，每次只能读一个
-if ($handle) {
-while (($fl = readdir($handle)) !== false) {
-$temp = $dir . DIRECTORY_SEPARATOR . $fl;
-$copyTemp = $copyDir . DIRECTORY_SEPARATOR . $fl;
-//如果不加  $fl!='.' && $fl != '..'  则会造成把$dir的父级目录也读取出来
-if ($fl == $ignore && $ignore) {
-continue;
-}
-if (is_dir($temp) && $fl != '.' && $fl != '..') {
-//复制子目录
-$this->generateFiles($temp, $copyTemp);
-} else {
-if ($fl != '.' && $fl != '..') {
-$fileContent = file_get_contents($temp);
-file_put_contents($copyTemp, $fileContent);
-}
-}
-}
-}
-}
+注：
 
-/**
-* 复制文件并加密
-* @param $dir
-* @param string $copyDir
-* @param string $ignore
-* @return bool
-*/
-public function generateEncryptFiles($dir, $copyDir = '', $ignore = '.git')
-{
-if (!is_dir($dir))
-return false;
-if (!$copyDir) {
-$copyDir = $dir . 'copy';
-}
-$this->createDir($copyDir);
-$handle = opendir($dir);  //opendir()函数的作用是：打开目录句柄
-$custom = new Custom();
-//每次使用readdir后，readdir会读到下一个文件，readdir是依次读出目录中的所有文件，每次只能读一个
-if ($handle) {
-while (($fl = readdir($handle)) !== false) {
-$temp = $dir . DIRECTORY_SEPARATOR . $fl;
-$copyFl = $custom->setPattern(2)->setElement($fl)->encrypt($this->encryptCount)->toString();
-$copyTemp = $copyDir . DIRECTORY_SEPARATOR . $copyFl;
-//如果不加  $fl!='.' && $fl != '..'  则会造成把$dir的父级目录也读取出来
-if ($fl == $ignore && $ignore) {
-continue;
-}
-if (is_dir($temp) && $fl != '.' && $fl != '..') {
-//复制子目录
-$this->generateEncryptFiles($temp, $copyTemp);
-} else {
-if ($fl != '.' && $fl != '..') {
-$fileContent = file_get_contents($temp);
-$copyContent = $custom->setPattern(1)->setElement($fileContent)->encrypt($this->encryptCount)->toString();
-file_put_contents($copyTemp, $copyContent);
-}
-}
-}
-}
-}
+如果我们使用单例模式的话，将来假如我们需要多个实例，将非常轻松的改变，但是使用static方法的类就不行。而且使用单例的话，将很好地利用继承、多态等方法。
 
-public function generateDecryptFiles($dir, $copyDir = '')
-{
-if (!is_dir($dir))
-return false;
-if (!$copyDir) {
-if(strpos($dir,'copy') !== false){
-$copyDir = str_replace('copy','',$dir);
-}
-$copyDir .= 'decry';
-}
-$this->createDir($copyDir);
-$handle = opendir($dir);  //opendir()函数的作用是：打开目录句柄
-$custom = new Custom();
-//每次使用readdir后，readdir会读到下一个文件，readdir是依次读出目录中的所有文件，每次只能读一个
-if ($handle) {
-while (($fl = readdir($handle)) !== false) {
-$temp = $dir . DIRECTORY_SEPARATOR . $fl;
-$copyFl = $custom->setPattern(2)->setElement($fl)->decrypt($this->encryptCount)->toString();
-$copyTemp = $copyDir . DIRECTORY_SEPARATOR . $copyFl;
-//如果不加  $fl!='.' && $fl != '..'  则会造成把$dir的父级目录也读取出来
-if (is_dir($temp) && $fl != '.' && $fl != '..') {
-//复制子目录
-$this->generateDecryptFiles($temp, $copyTemp);
-} else {
-if ($fl != '.' && $fl != '..') {
-$fileContent = file_get_contents($temp);
-$copyContent = $custom->setPattern(1)->setElement($fileContent)->decrypt($this->encryptCount)->toString();
-file_put_contents($copyTemp, $copyContent);
-}
-}
-}
-}
-}
+stackoverflow相关讨论：
 
-public function createDir($dir)
-{
-if (!is_dir($dir)) {
-mkdir($dir, 0777, true);
-}
-}
-}
+        
+*[“Advantage of Static class over use of Singleton”](http://stackoverflow.com/questions/839383/advantage-of-static-class-over-use-of-singleton/ "")
+*[“Difference between singleton class and static class?”](http://stackoverflow.com/questions/3714971/difference-between-singleton-class-and-static-class "")
