@@ -196,7 +196,7 @@ class Custom extends Parse
         $change_after = '';
         for ($i = 0; $i < strlen($str); $i++) {
             $temp_str = dechex(ord($str[$i]));
-            $change_after .= $temp_str[1] . $temp_str[0];
+            $change_after .= @$temp_str[1] . @$temp_str[0];
         }
         return strtoupper($change_after);
     }
