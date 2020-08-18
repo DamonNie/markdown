@@ -26,12 +26,11 @@ include_once 'Core/Common/functions.php';
 include_once 'Core/App.class.php';
 //进入到初始化类
 \Core\App::run();    //由于采用命名空间，因此访问类的时候必须带上空间";
-$str = preg_match_all("/([\x{4e00}-\x{9fa5}])/u", $input, $match);
-//print_r($match);
-//print_r($str);
-$path = 'D:\workspace\markdown';
+//$str = preg_match_all("/([\x{4e00}-\x{9fa5}])/u", $input, $match);
+set_time_limit(0);
+$path = 'C:\Users\W9004022\Desktop\oppo\test';
 $data = (new File())->generateEncryptFiles($path);
-$path = 'D:\workspace\markdowncopy';
+$path = 'C:\Users\W9004022\Desktop\oppo\testcopy';
 $data = (new File())->generateDecryptFiles($path);
 
 
