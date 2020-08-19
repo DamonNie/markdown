@@ -1,124 +1,74 @@
-<div class="post">
-    <h1 class="postTitle">
-
-        <a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/GaZeon/p/5421906.html">
-            <span>php-fpm启动，重启，终止操作</span>
-
-
-
-        </a>
-
-    </h1>
-    <div class="clear"></div>
-    <div class="postBody">
-
-        <div id="cnblogs_post_body" class="blogpost-body">
-            <p>　　最近安装了mysqli扩展，重启了nginx后，phpinfo()没有显示出mysqli，后来搞不出原因，直接使用了pdo连接数据库。直到今天安装redis后phpinfo()没有显示redis,内心那一万只奔腾的草泥马终于爆发，狂找办法，才知道是php-fpm没有重启，按网上的方法鼓捣，完全就是百度文章一家亲，没有一个说到点上，最后还是鼓捣出来了，下面说说php-fpm启动，重启，终止操作方法。</p>
-            <p>&nbsp;</p>
-            <p>启动php-fpm:</p>
-            <p><span style="font-size: 16px; color: #ff0000;">/usr/<span class="hljs-built_in">local/php/sbin/php-fpm</span></span></p>
-            <p>&nbsp;</p>
-            <p>php 5.3.3 以后的php-fpm <span style="color: #ff0000;">不再支持</span> php-fpm 以前具有的 /usr/local/php/sbin/php-fpm (start|stop|reload)等命令，所以不要再看这种老掉牙的命令了，需要<span style="color: #ff0000;">使用信号控制</span>：</p>
-            <p>master进程可以理解以下信号</p>
-            <p><span style="color: #ff0000;">INT, TERM&nbsp;</span>立刻终止<br><span style="color: #ff0000;">QUIT&nbsp;</span>平滑终止<br><span style="color: #ff0000;">USR1</span>&nbsp;重新打开日志文件<br><span style="color: #ff0000;">USR2</span>&nbsp;平滑重载所有worker进程并重新载入配置和二进制模块</p>
-            <p>&nbsp;</p>
-            <p>一个简单直接的重启方法：</p>
-            <p>先查看php-fpm的master进程号</p>
-            <div class="cnblogs_code">
-<pre># <span style="color: #0000ff;">ps</span> aux|<span style="color: #0000ff;">grep</span> php-<span style="color: #000000;">fpm
-root     </span><span style="color: #800080;">21891</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.0</span> <span style="color: #800080;">112660</span>   <span style="color: #800080;">960</span> pts/<span style="color: #800080;">3</span>    R+   <span style="color: #800080;">16</span>:<span style="color: #800080;">18</span>   <span style="color: #800080;">0</span>:<span style="color: #800080;">00</span> <span style="color: #0000ff;">grep</span> --color=auto php-<span style="color: #000000;">fpm
-root     </span><span style="color: #800080;">42891</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.1</span> <span style="color: #800080;">182796</span>  <span style="color: #800080;">1220</span> ?        Ss   4月18   <span style="color: #800080;">0</span>:<span style="color: #800080;">19</span> php-fpm: master process (/usr/local/php/etc/php-<span style="color: #000000;">fpm.conf)
-nobody   </span><span style="color: #800080;">42892</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.6</span> <span style="color: #800080;">183000</span>  <span style="color: #800080;">6516</span> ?        S    4月18   <span style="color: #800080;">0</span>:<span style="color: #800080;">07</span> php-<span style="color: #000000;">fpm: pool www
-nobody   </span><span style="color: #800080;">42893</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.6</span> <span style="color: #800080;">183000</span>  <span style="color: #800080;">6508</span> ?        S    4月18   <span style="color: #800080;">0</span>:<span style="color: #800080;">17</span> php-fpm: pool www</pre>
-            </div>
-            <p>重启php-fpm:</p>
-            <p><span style="color: #ff0000; font-size: 16px;">kill -USR2 42891</span></p>
-            <p>OK了。</p>
-            <p>&nbsp;</p>
-            <p>上面方案一般是没有生成php-fpm.pid文件时使用，如果要生成php-fpm.pid，使用下面这种方案：</p>
-            <p>上面master进程可以看到，matster使用的是/usr/local/php/etc/php-fpm.conf这个配置文件，<span style="color: #ff0000;">cat&nbsp;/usr/local/php/etc/php-fpm.conf</span> 发现：</p>
-            <div class="cnblogs_code">
-<pre><span style="color: #000000;">[global]
-; Pid </span><span style="color: #0000ff;">file</span><span style="color: #000000;">
-; Note: the default prefix is </span>/usr/local/php/<span style="color: #000000;">var
-; Default Value: none
-;pid </span>= run/php-fpm.pid</pre>
-            </div>
-            <p>&nbsp;</p>
-            <p>pid文件路径应该位于/usr/local/php/var/run/php-fpm.pid，由于注释掉，所以没有生成，我们把注释去除，再kill -USR2 42891 重启php-fpm,便会生成pid文件，下次就可以使用以下命令重启,关闭php-fpm了：</p>
-            <p>php-fpm 关闭：<br><span style="color: #ff0000;">kill -INT 'cat /usr/local/php/var/run/php-fpm.pid'</span><br>php-fpm 重启：<br><span style="color: #ff0000;">kill -USR2 'cat /usr/local/php/var/run/php-fpm.pid'</span></p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p><span style="color: #000000;">网上搜到</span>Nginx和PHP-FPM的启动、重启、停止脚本：http://www.jb51.net/article/58796.htm</p>
-            <p>&nbsp;</p>
-        </div>
-        <div id="MySignature" style="display: block;"><div class="esa-post-signature">
-            <p>作者：
-                GaZeon
-            </p>
-            <p>出处：<a href="https://www.cnblogs.com/GaZeon/p/5421906.html">https://www.cnblogs.com/GaZeon/p/5421906.html</a></p>
-            <p>版权：本文采用「<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">署名-非商业性使用-相同方式共享 4.0 国际</a>」知识共享许可协议进行许可。</p>
-            <p></p>
-        </div></div>
-        <div class="clear"></div>
-        <div id="blog_post_info_block">
-            <div id="EntryTag">
-                标签:
-                <a href="https://www.cnblogs.com/GaZeon/tag/php/">php</a>,             <a href="https://www.cnblogs.com/GaZeon/tag/php-fpm/">php-fpm</a></div>
-
-            <div id="blog_post_info">
-                <div id="green_channel">
-                    <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5421906,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
-                    <a id="green_channel_follow" onclick="follow('8bb87e7d-63e3-e511-9fc1-ac853d9f53cc');" href="javascript:void(0);">关注我</a>
-                    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
-                    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="https://common.cnblogs.com/images/icon_weibo_24.png" alt=""></a>
-                    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="https://common.cnblogs.com/images/wechat.png" alt=""></a>
-                </div>
-                <div id="author_profile">
-                    <div id="author_profile_info" class="author_profile_info">
-                        <a href="https://home.cnblogs.com/u/GaZeon/" target="_blank"><img src="https://pic.cnblogs.com/face/905655/20200501153135.png" class="author_avatar" alt=""></a>
-                        <div id="author_profile_detail" class="author_profile_info">
-                            <a href="https://home.cnblogs.com/u/GaZeon/">GaZeon</a><br>
-                            <a href="https://home.cnblogs.com/u/GaZeon/followees/">关注 - 4</a><br>
-                            <a href="https://home.cnblogs.com/u/GaZeon/followers/">粉丝 - 7</a>
-                        </div>
-                    </div>
-                    <div class="clear"></div>
-                    <div id="author_profile_honor"></div>
-                    <div id="author_profile_follow">
-                        <a href="javascript:void(0);" onclick="follow('8bb87e7d-63e3-e511-9fc1-ac853d9f53cc');return false;">+加关注</a>
-                    </div>
-                </div>
-                <div id="div_digg">
-                    <div class="diggit" onclick="votePost(5421906,'Digg')">
-                        <span class="diggnum" id="digg_count">2</span>
-                    </div>
-                    <div class="buryit" onclick="votePost(5421906,'Bury')">
-                        <span class="burynum" id="bury_count">0</span>
-                    </div>
-                    <div class="clear"></div>
-                    <div class="diggword" id="digg_tips">
-                    </div>
-                </div>
-
-                <script type="text/javascript">
-                    currentDiggType = 0;
-                </script></div>
-            <div class="clear"></div>
-            <div id="post_next_prev">
-
-                <a href="https://www.cnblogs.com/GaZeon/p/5410774.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/GaZeon/p/5410774.html" title="发布于 2016-04-20 17:14">Xunsearch迅搜(基于 xapian+scws 的开源中文搜索引擎)安装与简单使用</a>
-                <br>
-                <a href="https://www.cnblogs.com/GaZeon/p/5422078.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/GaZeon/p/5422078.html" title="发布于 2016-04-23 13:09">Linux下Redis安装使用，主从模式，哨兵模式与PHP扩展(PHP7适用)</a>
-
-            </div>
+<article id="post-150" class="single-post post-150 post type-post status-publish format-standard has-post-thumbnail hentry category-study">
+    <h1 class="entry-title">编译升级PHP 7.4.0</h1>
+    <div class="post-meta">
+	<span class="vcard author">
+		<a href="https://hqidi.com/author/huangqidi" class="vcard author" rel="author">dige</a></span>
+        <span class="divider">•</span>
+        <time class="entry-date published" datetime="2019-11-29T14:50:12+08:00">2019年11月29日</time>
+        <span class="divider">•</span>
+        <span class="comments-count"><a href="https://hqidi.com/150.html#comments">11 条评论</a></span>
+        <span class="divider">•</span>
+        9,129 人阅读	</div>
+    <!-- END .post-meta -->
+    <!-- END .entry-header -->
+    <div class="entry-content">
+        <h3>备份当前版本</h3>
+        <p>安全第一，不忘备份</p>
+        <div class="precode clearfix"><pre class="prettyprint prettyprinted" style=""><span class="pln">which php
+</span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php</span><span class="pun">/</span><span class="pln">bin</span><span class="pun">/</span><span class="pln">php
+cp </span><span class="pun">-</span><span class="pln">r </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php_bak</span></pre></div>
+        <h3>获取当前 PHP 配置参数</h3>
+        <p>我是直接在历史命令里面找到的：<br>
+            history |grep configure<br>
+            如果你找不到就执行如下命令找：</p>
+        <p>/usr/local/php/bin/php -i | head</p>
+        <p>总之，我们需要的就是下面的东西：</p>
+        <p>./configure --prefix=/usr/local/php --enable-opcache --with-config-file-path=/usr/local/php/etc --with-curl --enable-fpm  --with-gd --with-iconv --enable-mbstring --with-mysqli=mysqlnd --with-openssl --enable-static --enable-sockets --enable-inline-optimization --with-zlib --disable-ipv6 --disable-fileinfo --disable-debug</p>
+        <p>这里要注意，气死你的PHP版本里面(7.4.0)<span style="color: #ff0000;">已经不支持“--with-gd”，得改成“--enable-gd”</span>，否则会报错“GD Library Error: imagecreatetruecolor does not exist - please contact your webhost and ask them to install the GD library<br>
+            ”所以最终我们得到的配置参数为：</p>
+        <p>./configure --prefix=/usr/local/php --enable-opcache --with-config-file-path=/usr/local/php/etc --with-curl --enable-fpm  --enable-gd --with-iconv --enable-mbstring --with-mysqli=mysqlnd --with-openssl --enable-static --enable-sockets --enable-inline-optimization --with-zlib --disable-ipv6 --disable-fileinfo --disable-debug</p>
+        <h3>下载PHP</h3>
+        <p>从 https://www.php.net/downloads.php 页面下载 PHP 的最新 Stable 版本，解压缩，进入源码目录。</p>
+        <div class="precode clearfix"><pre class="prettyprint prettyprinted" style=""><span class="pln">wget https</span><span class="pun">:</span><span class="com">//www.php.net/distributions/php-7.4.0.tar.gz</span><span class="pln">
+tar xf php</span><span class="pun">-</span><span class="lit">7.4</span><span class="pun">.</span><span class="lit">0.tar</span><span class="pun">.</span><span class="pln">gz
+cd php</span><span class="pun">-</span><span class="lit">7.4</span><span class="pun">.</span><span class="lit">0</span></pre></div>
+        <h3>配置PHP</h3>
+        <p>在编译之前，需要进入源代码目录，对要安装的程序进行各种参数配置，比如安装到什么地方，需要开启哪些功能等。配置工作一般都由源码目录中的configure脚本完成。</p>
+        <div class="precode clearfix"><pre class="prettyprint prettyprinted" style=""><span class="pun">.</span><span class="str">/configure --prefix=/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">opcache </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">config</span><span class="pun">-</span><span class="pln">file</span><span class="pun">-</span><span class="pln">path</span><span class="pun">=</span><span class="str">/usr/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php</span><span class="pun">/</span><span class="pln">etc </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">curl </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">fpm  </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">gd </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">iconv </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">mbstring </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">mysqli</span><span class="pun">=</span><span class="pln">mysqlnd </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">openssl </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="kwd">static</span><span class="pln"> </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">sockets </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="kwd">inline</span><span class="pun">-</span><span class="pln">optimization </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">zlib </span><span class="pun">--</span><span class="pln">disable</span><span class="pun">-</span><span class="pln">ipv6 </span><span class="pun">--</span><span class="pln">disable</span><span class="pun">-</span><span class="pln">fileinfo </span><span class="pun">--</span><span class="pln">disable</span><span class="pun">-</span><span class="pln">debug</span></pre></div>
+        <h4>error: Package requirements (sqlite3 &gt; 3.7.4) were not met</h4>
+        <p>error: Package requirements (sqlite3 &gt; 3.7.4) were not met<br>
+            No package 'sqlite3' found<br>
+            若看到上面的报错，非常简单：<br>
+            yum install libsqlite3x-devel -y</p>
+        <h4>error: Package requirements (oniguruma) were not met</h4>
+        <p>error: Package requirements (oniguruma) were not met<br>
+            No package 'oniguruma' found<br>
+            若看到上面的报错，非常简单：<br>
+            yum install oniguruma-devel -y</p>
+        <h3>编译PHP</h3>
+        <p>刚才的配置通过后，直接运行 make 进行编译。</p>
+        <h3>安装PHP</h3>
+        <p>刚才的编译通过后，先停止PHP-FPM服务：<br>
+            systemctl stop php-fpm<br>
+            然后运行 make install 进行安装，安装成功后，我们得改下php.ini文件，该文件里面的<br>
+            zend_extension="/usr/local/php/lib/php/extensions/no-debug-non-zts-20170718/opcache.so"<br>
+            改成：<br>
+            zend_extension="/usr/local/php/lib/php/extensions/no-debug-non-zts-20190902/opcache.so"<br>
+            最后启动PHP-FPM服务：<br>
+            systemctl start php-fpm<br>
+            进入你的网站根目录执行：<br>
+            echo "&lt;?php phpinfo() ?&gt;" &gt;d.php<br>
+            然后访问 https://yoursite.com/d.php 来检测此处升级的结果，确认升级成功后记得删除 d.php</p>
+        <p>更详细的安装步骤请查看：<br>
+            <a href="https://hqidi.com/51.html" rel="noopener" target="_blank">Centos 6.5 x64安装php 7.2</a><br>
+            <a href="https://hqidi.com/129.html" rel="noopener" target="_blank">PHP-FPM没有生成socket文件</a></p>
+        <div style="margin-top: 15px; font-style: italic">
+            <p><strong>原创文章，转载请注明：</strong> 转载自<a href="https://hqidi.com/">笛声</a></p>
+            <p><strong>本文链接地址:</strong> <a href="https://hqidi.com/150.html">编译升级PHP 7.4.0</a></p>
         </div>
     </div>
-    <div class="postDesc">posted @
-        <span id="post-date">2016-04-22 16:45</span>&nbsp;
-        <a href="https://www.cnblogs.com/GaZeon/">GaZeon</a>&nbsp;
-        阅读(<span id="post_view_count">79411</span>)&nbsp;
-        评论(<span id="post_comment_count">0</span>)&nbsp;
-        <a href="https://i.cnblogs.com/EditPosts.aspx?postid=5421906" rel="nofollow">编辑</a>&nbsp;
-        <a href="javascript:void(0)" onclick="AddToWz(5421906);return false;">收藏</a></div>
-</div>
+    <!-- END .entry-content -->
+    <footer class="entry-footer">
+    </footer>
+    <!-- END .entry-footer -->
+</article>

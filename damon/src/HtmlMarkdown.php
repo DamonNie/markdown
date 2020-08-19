@@ -30,7 +30,7 @@ class HtmlMarkdown extends Parse
         $this->element = preg_replace($reg, '', $this->element);
         //单引号转为双引号
         $this->element = str_replace('\'', '"', $this->element);
-        $this->element = str_replace('&nbsp;', '', $this->element);
+        $this->element = str_replace('&nbsp;', ' ', $this->element);
         $tidy_config = [
             'clean'          => true,
             'indent'         => true,//是否缩进
@@ -54,7 +54,7 @@ class HtmlMarkdown extends Parse
 
     public function toString()
     {
-        return trim($this->element);
+        return trim(str_replace('&nbsp;', ' ', $this->element));
     }
 
     public function parse()
