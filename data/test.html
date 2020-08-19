@@ -1,42 +1,124 @@
-<article class="hentry" role="article">
+<div class="post">
+    <h1 class="postTitle">
 
-    <header>
-
-        <h1 class="entry-title">什么时候应该使用“静态类”而不使用单例？</h1>
-
-
-        <p class="meta">
+        <a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/GaZeon/p/5421906.html">
+            <span>php-fpm启动，重启，终止操作</span>
 
 
 
+        </a>
 
+    </h1>
+    <div class="clear"></div>
+    <div class="postBody">
 
-            <time class="entry-date" datetime="2014-09-24T20:26:02+08:00"><span class="date">2014-09-24 Wed</span> <span class="time">20:26</span></time>
+        <div id="cnblogs_post_body" class="blogpost-body">
+            <p>　　最近安装了mysqli扩展，重启了nginx后，phpinfo()没有显示出mysqli，后来搞不出原因，直接使用了pdo连接数据库。直到今天安装redis后phpinfo()没有显示redis,内心那一万只奔腾的草泥马终于爆发，狂找办法，才知道是php-fpm没有重启，按网上的方法鼓捣，完全就是百度文章一家亲，没有一个说到点上，最后还是鼓捣出来了，下面说说php-fpm启动，重启，终止操作方法。</p>
+            <p>&nbsp;</p>
+            <p>启动php-fpm:</p>
+            <p><span style="font-size: 16px; color: #ff0000;">/usr/<span class="hljs-built_in">local/php/sbin/php-fpm</span></span></p>
+            <p>&nbsp;</p>
+            <p>php 5.3.3 以后的php-fpm <span style="color: #ff0000;">不再支持</span> php-fpm 以前具有的 /usr/local/php/sbin/php-fpm (start|stop|reload)等命令，所以不要再看这种老掉牙的命令了，需要<span style="color: #ff0000;">使用信号控制</span>：</p>
+            <p>master进程可以理解以下信号</p>
+            <p><span style="color: #ff0000;">INT, TERM&nbsp;</span>立刻终止<br><span style="color: #ff0000;">QUIT&nbsp;</span>平滑终止<br><span style="color: #ff0000;">USR1</span>&nbsp;重新打开日志文件<br><span style="color: #ff0000;">USR2</span>&nbsp;平滑重载所有worker进程并重新载入配置和二进制模块</p>
+            <p>&nbsp;</p>
+            <p>一个简单直接的重启方法：</p>
+            <p>先查看php-fpm的master进程号</p>
+            <div class="cnblogs_code">
+<pre># <span style="color: #0000ff;">ps</span> aux|<span style="color: #0000ff;">grep</span> php-<span style="color: #000000;">fpm
+root     </span><span style="color: #800080;">21891</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.0</span> <span style="color: #800080;">112660</span>   <span style="color: #800080;">960</span> pts/<span style="color: #800080;">3</span>    R+   <span style="color: #800080;">16</span>:<span style="color: #800080;">18</span>   <span style="color: #800080;">0</span>:<span style="color: #800080;">00</span> <span style="color: #0000ff;">grep</span> --color=auto php-<span style="color: #000000;">fpm
+root     </span><span style="color: #800080;">42891</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.1</span> <span style="color: #800080;">182796</span>  <span style="color: #800080;">1220</span> ?        Ss   4月18   <span style="color: #800080;">0</span>:<span style="color: #800080;">19</span> php-fpm: master process (/usr/local/php/etc/php-<span style="color: #000000;">fpm.conf)
+nobody   </span><span style="color: #800080;">42892</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.6</span> <span style="color: #800080;">183000</span>  <span style="color: #800080;">6516</span> ?        S    4月18   <span style="color: #800080;">0</span>:<span style="color: #800080;">07</span> php-<span style="color: #000000;">fpm: pool www
+nobody   </span><span style="color: #800080;">42893</span>  <span style="color: #800080;">0.0</span>  <span style="color: #800080;">0.6</span> <span style="color: #800080;">183000</span>  <span style="color: #800080;">6508</span> ?        S    4月18   <span style="color: #800080;">0</span>:<span style="color: #800080;">17</span> php-fpm: pool www</pre>
+            </div>
+            <p>重启php-fpm:</p>
+            <p><span style="color: #ff0000; font-size: 16px;">kill -USR2 42891</span></p>
+            <p>OK了。</p>
+            <p>&nbsp;</p>
+            <p>上面方案一般是没有生成php-fpm.pid文件时使用，如果要生成php-fpm.pid，使用下面这种方案：</p>
+            <p>上面master进程可以看到，matster使用的是/usr/local/php/etc/php-fpm.conf这个配置文件，<span style="color: #ff0000;">cat&nbsp;/usr/local/php/etc/php-fpm.conf</span> 发现：</p>
+            <div class="cnblogs_code">
+<pre><span style="color: #000000;">[global]
+; Pid </span><span style="color: #0000ff;">file</span><span style="color: #000000;">
+; Note: the default prefix is </span>/usr/local/php/<span style="color: #000000;">var
+; Default Value: none
+;pid </span>= run/php-fpm.pid</pre>
+            </div>
+            <p>&nbsp;</p>
+            <p>pid文件路径应该位于/usr/local/php/var/run/php-fpm.pid，由于注释掉，所以没有生成，我们把注释去除，再kill -USR2 42891 重启php-fpm,便会生成pid文件，下次就可以使用以下命令重启,关闭php-fpm了：</p>
+            <p>php-fpm 关闭：<br><span style="color: #ff0000;">kill -INT 'cat /usr/local/php/var/run/php-fpm.pid'</span><br>php-fpm 重启：<br><span style="color: #ff0000;">kill -USR2 'cat /usr/local/php/var/run/php-fpm.pid'</span></p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p><span style="color: #000000;">网上搜到</span>Nginx和PHP-FPM的启动、重启、停止脚本：http://www.jb51.net/article/58796.htm</p>
+            <p>&nbsp;</p>
+        </div>
+        <div id="MySignature" style="display: block;"><div class="esa-post-signature">
+            <p>作者：
+                GaZeon
+            </p>
+            <p>出处：<a href="https://www.cnblogs.com/GaZeon/p/5421906.html">https://www.cnblogs.com/GaZeon/p/5421906.html</a></p>
+            <p>版权：本文采用「<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">署名-非商业性使用-相同方式共享 4.0 国际</a>」知识共享许可协议进行许可。</p>
+            <p></p>
+        </div></div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+            <div id="EntryTag">
+                标签:
+                <a href="https://www.cnblogs.com/GaZeon/tag/php/">php</a>,             <a href="https://www.cnblogs.com/GaZeon/tag/php-fpm/">php-fpm</a></div>
 
-        </p>
+            <div id="blog_post_info">
+                <div id="green_channel">
+                    <a href="javascript:void(0);" id="green_channel_digg" onclick="DiggIt(5421906,cb_blogId,1);green_channel_success(this,'谢谢推荐！');">好文要顶</a>
+                    <a id="green_channel_follow" onclick="follow('8bb87e7d-63e3-e511-9fc1-ac853d9f53cc');" href="javascript:void(0);">关注我</a>
+                    <a id="green_channel_favorite" onclick="AddToWz(cb_entryId);return false;" href="javascript:void(0);">收藏该文</a>
+                    <a id="green_channel_weibo" href="javascript:void(0);" title="分享至新浪微博" onclick="ShareToTsina()"><img src="https://common.cnblogs.com/images/icon_weibo_24.png" alt=""></a>
+                    <a id="green_channel_wechat" href="javascript:void(0);" title="分享至微信" onclick="shareOnWechat()"><img src="https://common.cnblogs.com/images/wechat.png" alt=""></a>
+                </div>
+                <div id="author_profile">
+                    <div id="author_profile_info" class="author_profile_info">
+                        <a href="https://home.cnblogs.com/u/GaZeon/" target="_blank"><img src="https://pic.cnblogs.com/face/905655/20200501153135.png" class="author_avatar" alt=""></a>
+                        <div id="author_profile_detail" class="author_profile_info">
+                            <a href="https://home.cnblogs.com/u/GaZeon/">GaZeon</a><br>
+                            <a href="https://home.cnblogs.com/u/GaZeon/followees/">关注 - 4</a><br>
+                            <a href="https://home.cnblogs.com/u/GaZeon/followers/">粉丝 - 7</a>
+                        </div>
+                    </div>
+                    <div class="clear"></div>
+                    <div id="author_profile_honor"></div>
+                    <div id="author_profile_follow">
+                        <a href="javascript:void(0);" onclick="follow('8bb87e7d-63e3-e511-9fc1-ac853d9f53cc');return false;">+加关注</a>
+                    </div>
+                </div>
+                <div id="div_digg">
+                    <div class="diggit" onclick="votePost(5421906,'Digg')">
+                        <span class="diggnum" id="digg_count">2</span>
+                    </div>
+                    <div class="buryit" onclick="votePost(5421906,'Bury')">
+                        <span class="burynum" id="bury_count">0</span>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="diggword" id="digg_tips">
+                    </div>
+                </div>
 
-    </header>
+                <script type="text/javascript">
+                    currentDiggType = 0;
+                </script></div>
+            <div class="clear"></div>
+            <div id="post_next_prev">
 
+                <a href="https://www.cnblogs.com/GaZeon/p/5410774.html" class="p_n_p_prefix">« </a> 上一篇：    <a href="https://www.cnblogs.com/GaZeon/p/5410774.html" title="发布于 2016-04-20 17:14">Xunsearch迅搜(基于 xapian+scws 的开源中文搜索引擎)安装与简单使用</a>
+                <br>
+                <a href="https://www.cnblogs.com/GaZeon/p/5422078.html" class="p_n_p_prefix">» </a> 下一篇：    <a href="https://www.cnblogs.com/GaZeon/p/5422078.html" title="发布于 2016-04-23 13:09">Linux下Redis安装使用，主从模式，哨兵模式与PHP扩展(PHP7适用)</a>
 
-    <div class="entry-content"><p>经常我们都会使用单例，而有时候我们又会贪图方便而使用一个类然后全部都使用静态方法。那么，到底什么时候我们才应该使用这种都是静态方法的类呢(注：java没有静态类)？</p>
-
-        <ol>
-            <li>所有方法都是一些工具类的方法，如<code>Math</code>类</li>
-            <li>不希望被gc回收又不想自己去处理实例。</li>
-            <li>很确定这个类将来也不会是有状态的（stateful）而且你确定你不需要多个实例。</li>
-        </ol>
-
-
-        <p>注：</p>
-
-        <p>如果我们使用单例模式的话，将来假如我们需要多个实例，将非常轻松的改变，但是使用static方法的类就不行。而且使用单例的话，将很好地利用继承、多态等方法。</p>
-
-        <p>stackoverflow相关讨论：</p>
-
-        <ul>
-            <li><a href="http://stackoverflow.com/questions/839383/advantage-of-static-class-over-use-of-singleton/">“Advantage of Static class over use of Singleton”</a></li>
-            <li><a href="http://stackoverflow.com/questions/3714971/difference-between-singleton-class-and-static-class">“Difference between singleton class and static class?”</a></li>
-        </ul>
-
+            </div>
+        </div>
     </div>
-</article>
+    <div class="postDesc">posted @
+        <span id="post-date">2016-04-22 16:45</span>&nbsp;
+        <a href="https://www.cnblogs.com/GaZeon/">GaZeon</a>&nbsp;
+        阅读(<span id="post_view_count">79411</span>)&nbsp;
+        评论(<span id="post_comment_count">0</span>)&nbsp;
+        <a href="https://i.cnblogs.com/EditPosts.aspx?postid=5421906" rel="nofollow">编辑</a>&nbsp;
+        <a href="javascript:void(0)" onclick="AddToWz(5421906);return false;">收藏</a></div>
+</div>
