@@ -78,8 +78,7 @@ class HtmlMarkdown extends Parse
             ["#[ ]*<header[^>]*?>(.*?)</header>#is", '$1', '</header>'],
             ["#[ ]*<time[^>]*?>(.*?)</time>#is", '$1', '</time>'],
             //处理p code标签
-            ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```
-            $2```", '</code></pre>'],
+            ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```".PHP_EOL."$2".PHP_EOL."```", '</code></pre>'],
             ['#[ ]*<code[^>]*?>(.*?)</code>#is', "`$1`", '</code>'],
             ['#[ ]*<pre[^>]*?>(.*?)</pre>#is', "`$1`", '</pre>'],
             ["#[ ]*<p[^>]*?>(.*?)</p>#is", '$1', 'p>'],
@@ -117,6 +116,7 @@ class HtmlMarkdown extends Parse
         //需要使用pre_match_all，再进行处理html标签
         $this->handlePatternHtml($pattern_array);
         $this->element = preg_replace('#<br/?>#is', PHP_EOL, $this->element);
+        $this->element = str_replace(['&lt;','&gt;','&amp;'], ['<','>','&'], $this->element);
         return $this;
     }
 
@@ -207,7 +207,7 @@ class HtmlMarkdown extends Parse
                 $_element = PHP_EOL;
                 if (preg_match_all($liPattern, $uls[1][$key], $lis)) {
                     foreach ($lis[0] as $k => $v) {
-                        $_element .= '* ' . trim($lis[1][$k]) . PHP_EOL;
+                        $_element .= '*&nbsp;' . trim($lis[1][$k]) . PHP_EOL;
                     }
                     //替换ul为null
                     $this->element = str_replace($value, $_element, $this->element);

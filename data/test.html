@@ -1,74 +1,170 @@
-<article id="post-150" class="single-post post-150 post type-post status-publish format-standard has-post-thumbnail hentry category-study">
-    <h1 class="entry-title">编译升级PHP 7.4.0</h1>
-    <div class="post-meta">
-	<span class="vcard author">
-		<a href="https://hqidi.com/author/huangqidi" class="vcard author" rel="author">dige</a></span>
-        <span class="divider">•</span>
-        <time class="entry-date published" datetime="2019-11-29T14:50:12+08:00">2019年11月29日</time>
-        <span class="divider">•</span>
-        <span class="comments-count"><a href="https://hqidi.com/150.html#comments">11 条评论</a></span>
-        <span class="divider">•</span>
-        9,129 人阅读	</div>
-    <!-- END .post-meta -->
-    <!-- END .entry-header -->
-    <div class="entry-content">
-        <h3>备份当前版本</h3>
-        <p>安全第一，不忘备份</p>
-        <div class="precode clearfix"><pre class="prettyprint prettyprinted" style=""><span class="pln">which php
-</span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php</span><span class="pun">/</span><span class="pln">bin</span><span class="pun">/</span><span class="pln">php
-cp </span><span class="pun">-</span><span class="pln">r </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php_bak</span></pre></div>
-        <h3>获取当前 PHP 配置参数</h3>
-        <p>我是直接在历史命令里面找到的：<br>
-            history |grep configure<br>
-            如果你找不到就执行如下命令找：</p>
-        <p>/usr/local/php/bin/php -i | head</p>
-        <p>总之，我们需要的就是下面的东西：</p>
-        <p>./configure --prefix=/usr/local/php --enable-opcache --with-config-file-path=/usr/local/php/etc --with-curl --enable-fpm  --with-gd --with-iconv --enable-mbstring --with-mysqli=mysqlnd --with-openssl --enable-static --enable-sockets --enable-inline-optimization --with-zlib --disable-ipv6 --disable-fileinfo --disable-debug</p>
-        <p>这里要注意，气死你的PHP版本里面(7.4.0)<span style="color: #ff0000;">已经不支持“--with-gd”，得改成“--enable-gd”</span>，否则会报错“GD Library Error: imagecreatetruecolor does not exist - please contact your webhost and ask them to install the GD library<br>
-            ”所以最终我们得到的配置参数为：</p>
-        <p>./configure --prefix=/usr/local/php --enable-opcache --with-config-file-path=/usr/local/php/etc --with-curl --enable-fpm  --enable-gd --with-iconv --enable-mbstring --with-mysqli=mysqlnd --with-openssl --enable-static --enable-sockets --enable-inline-optimization --with-zlib --disable-ipv6 --disable-fileinfo --disable-debug</p>
-        <h3>下载PHP</h3>
-        <p>从 https://www.php.net/downloads.php 页面下载 PHP 的最新 Stable 版本，解压缩，进入源码目录。</p>
-        <div class="precode clearfix"><pre class="prettyprint prettyprinted" style=""><span class="pln">wget https</span><span class="pun">:</span><span class="com">//www.php.net/distributions/php-7.4.0.tar.gz</span><span class="pln">
-tar xf php</span><span class="pun">-</span><span class="lit">7.4</span><span class="pun">.</span><span class="lit">0.tar</span><span class="pun">.</span><span class="pln">gz
-cd php</span><span class="pun">-</span><span class="lit">7.4</span><span class="pun">.</span><span class="lit">0</span></pre></div>
-        <h3>配置PHP</h3>
-        <p>在编译之前，需要进入源代码目录，对要安装的程序进行各种参数配置，比如安装到什么地方，需要开启哪些功能等。配置工作一般都由源码目录中的configure脚本完成。</p>
-        <div class="precode clearfix"><pre class="prettyprint prettyprinted" style=""><span class="pun">.</span><span class="str">/configure --prefix=/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">opcache </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">config</span><span class="pun">-</span><span class="pln">file</span><span class="pun">-</span><span class="pln">path</span><span class="pun">=</span><span class="str">/usr/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">php</span><span class="pun">/</span><span class="pln">etc </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">curl </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">fpm  </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">gd </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">iconv </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">mbstring </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">mysqli</span><span class="pun">=</span><span class="pln">mysqlnd </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">openssl </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="kwd">static</span><span class="pln"> </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="pln">sockets </span><span class="pun">--</span><span class="pln">enable</span><span class="pun">-</span><span class="kwd">inline</span><span class="pun">-</span><span class="pln">optimization </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">zlib </span><span class="pun">--</span><span class="pln">disable</span><span class="pun">-</span><span class="pln">ipv6 </span><span class="pun">--</span><span class="pln">disable</span><span class="pun">-</span><span class="pln">fileinfo </span><span class="pun">--</span><span class="pln">disable</span><span class="pun">-</span><span class="pln">debug</span></pre></div>
-        <h4>error: Package requirements (sqlite3 &gt; 3.7.4) were not met</h4>
-        <p>error: Package requirements (sqlite3 &gt; 3.7.4) were not met<br>
-            No package 'sqlite3' found<br>
-            若看到上面的报错，非常简单：<br>
-            yum install libsqlite3x-devel -y</p>
-        <h4>error: Package requirements (oniguruma) were not met</h4>
-        <p>error: Package requirements (oniguruma) were not met<br>
-            No package 'oniguruma' found<br>
-            若看到上面的报错，非常简单：<br>
-            yum install oniguruma-devel -y</p>
-        <h3>编译PHP</h3>
-        <p>刚才的配置通过后，直接运行 make 进行编译。</p>
-        <h3>安装PHP</h3>
-        <p>刚才的编译通过后，先停止PHP-FPM服务：<br>
-            systemctl stop php-fpm<br>
-            然后运行 make install 进行安装，安装成功后，我们得改下php.ini文件，该文件里面的<br>
-            zend_extension="/usr/local/php/lib/php/extensions/no-debug-non-zts-20170718/opcache.so"<br>
-            改成：<br>
-            zend_extension="/usr/local/php/lib/php/extensions/no-debug-non-zts-20190902/opcache.so"<br>
-            最后启动PHP-FPM服务：<br>
-            systemctl start php-fpm<br>
-            进入你的网站根目录执行：<br>
-            echo "&lt;?php phpinfo() ?&gt;" &gt;d.php<br>
-            然后访问 https://yoursite.com/d.php 来检测此处升级的结果，确认升级成功后记得删除 d.php</p>
-        <p>更详细的安装步骤请查看：<br>
-            <a href="https://hqidi.com/51.html" rel="noopener" target="_blank">Centos 6.5 x64安装php 7.2</a><br>
-            <a href="https://hqidi.com/129.html" rel="noopener" target="_blank">PHP-FPM没有生成socket文件</a></p>
-        <div style="margin-top: 15px; font-style: italic">
-            <p><strong>原创文章，转载请注明：</strong> 转载自<a href="https://hqidi.com/">笛声</a></p>
-            <p><strong>本文链接地址:</strong> <a href="https://hqidi.com/150.html">编译升级PHP 7.4.0</a></p>
-        </div>
+<div class="article-intro" id="content">
+
+    <h1>Nginx 安装配置</h1>
+    <div class="tutintro">
+        <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx.jpg">
+        <p>Nginx("engine x")是一款是由俄罗斯的程序设计师Igor Sysoev所开发高性能的 Web和&nbsp;反向代理&nbsp;服务器，也是一个 IMAP/POP3/SMTP&nbsp;代理服务器。
+        </p>
+        <p>在高连接并发的情况下，Nginx是Apache服务器不错的替代品。</p>
     </div>
-    <!-- END .entry-content -->
-    <footer class="entry-footer">
-    </footer>
-    <!-- END .entry-footer -->
-</article>
+    <hr>
+    <h2>Nginx 安装</h2>
+    <p>
+        系统平台：CentOS release 6.6 (Final) 64位。</p>
+    <h3>一、安装编译工具及库文件</h3>
+    <pre class="prettyprint prettyprinted" style=""><span class="pln">yum </span><span class="pun">-</span><span class="pln">y install make zlib zlib</span><span class="pun">-</span><span class="pln">devel gcc</span><span class="pun">-</span><span class="pln">c</span><span class="pun">++</span><span class="pln"> libtool &nbsp;openssl openssl</span><span class="pun">-</span><span class="pln">devel</span></pre><h3>
+    二、首先要安装 PCRE</h3>
+    <p>
+        PCRE 作用是让 Nginx 支持 Rewrite 功能。</p><p>
+    1、下载 PCRE 安装包，下载地址：&nbsp;<a href="http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz">http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz</a></p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> cd </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">src</span><span class="pun">/</span><span class="pln">
+</span><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> wget&nbsp;http</span><span class="pun">:</span><span class="com">//downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz</span></pre>
+    <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx1.png">
+    <p>2、解压安装包:</p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> tar zxvf pcre</span><span class="pun">-</span><span class="lit">8.35</span><span class="pun">.</span><span class="pln">tar</span><span class="pun">.</span><span class="pln">gz</span></pre>
+    <p>
+        3、进入安装包目录</p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> cd pcre</span><span class="pun">-</span><span class="lit">8.35</span></pre>
+    <p>
+        4、编译安装&nbsp;
+    </p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;pcre</span><span class="pun">-</span><span class="lit">8.35</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">./</span><span class="pln">configure
+</span><span class="pun">[</span><span class="pln">root@bogon&nbsp;pcre</span><span class="pun">-</span><span class="lit">8.35</span><span class="pun">]#</span><span class="pln"> make&nbsp;</span><span class="pun">&amp;&amp;</span><span class="pln"> make install</span></pre>
+    <p>
+        5、查看pcre版本
+    </p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;pcre</span><span class="pun">-</span><span class="lit">8.35</span><span class="pun">]#</span><span class="pln"> pcre</span><span class="pun">-</span><span class="pln">config </span><span class="pun">--</span><span class="pln">version</span></pre>
+    <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx2.png">
+    <h3> 安装 Nginx</h3>
+    <p>
+        1、下载 Nginx，下载地址：<a href="http://nginx.org/download/nginx-1.6.2.tar.gz">http://nginx.org/download/nginx-1.6.2.tar.gz</a>
+    </p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> cd </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">src</span><span class="pun">/</span><span class="pln">
+</span><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> wget&nbsp;http</span><span class="pun">:</span><span class="com">//nginx.org/download/nginx-1.6.2.tar.gz</span></pre>
+    <p>
+        <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx3.png">
+        2、解压安装包
+    </p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> tar zxvf nginx</span><span class="pun">-</span><span class="lit">1.6</span><span class="pun">.</span><span class="lit">2.tar</span><span class="pun">.</span><span class="pln">gz</span></pre>
+    <p>
+        3、进入安装包目录
+    </p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;src</span><span class="pun">]#</span><span class="pln"> cd nginx</span><span class="pun">-</span><span class="lit">1.6</span><span class="pun">.</span><span class="lit">2</span></pre>
+    <p>
+        4、编译安装</p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;nginx</span><span class="pun">-</span><span class="lit">1.6</span><span class="pun">.</span><span class="lit">2</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">./</span><span class="pln">configure </span><span class="pun">--</span><span class="pln">prefix</span><span class="pun">=</span><span class="str">/usr/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">http_stub_status_module </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">http_ssl_module </span><span class="pun">--</span><span class="kwd">with</span><span class="pun">-</span><span class="pln">pcre</span><span class="pun">=</span><span class="str">/usr/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">src</span><span class="pun">/</span><span class="pln">pcre</span><span class="pun">-</span><span class="lit">8.35</span><span class="pln">
+</span><span class="pun">[</span><span class="pln">root@bogon&nbsp;nginx</span><span class="pun">-</span><span class="lit">1.6</span><span class="pun">.</span><span class="lit">2</span><span class="pun">]#</span><span class="pln"> make
+</span><span class="pun">[</span><span class="pln">root@bogon&nbsp;nginx</span><span class="pun">-</span><span class="lit">1.6</span><span class="pun">.</span><span class="lit">2</span><span class="pun">]#</span><span class="pln"> make install</span></pre>
+    <p>
+        5、查看nginx版本
+    </p><pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;nginx</span><span class="pun">-</span><span class="lit">1.6</span><span class="pun">.</span><span class="lit">2</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">-</span><span class="pln">v</span></pre>
+    <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx4.png">
+    <p>到此，nginx安装完成。</p>
+    <hr>
+    <h2>Nginx 配置</h2>
+    <p>
+        创建 Nginx 运行使用的用户 www：</p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;conf</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">groupadd www&nbsp;
+</span><span class="pun">[</span><span class="pln">root@bogon&nbsp;conf</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">useradd </span><span class="pun">-</span><span class="pln">g www www</span></pre>
+    <p>配置nginx.conf
+        ，将/usr/local/webserver/nginx/conf/nginx.conf替换为以下内容</p>
+    <p></p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;conf</span><span class="pun">]#</span><span class="pln"> &nbsp;cat </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">conf</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">.</span><span class="pln">conf
+
+user www www</span><span class="pun">;</span><span class="pln">
+worker_processes </span><span class="lit">2</span><span class="pun">;</span><span class="pln"> </span><span class="com">#设置值和CPU核心数一致</span><span class="pln">
+error_log </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">logs</span><span class="pun">/</span><span class="pln">nginx_error</span><span class="pun">.</span><span class="pln">log crit</span><span class="pun">;</span><span class="pln"> </span><span class="com">#日志位置和日志级别</span><span class="pln">
+pid </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">.</span><span class="pln">pid</span><span class="pun">;</span><span class="pln">
+</span><span class="com">#Specifies the value for maximum file descriptors that can be opened by this process.</span><span class="pln">
+worker_rlimit_nofile </span><span class="lit">65535</span><span class="pun">;</span><span class="pln">
+events
+</span><span class="pun">{</span><span class="pln">
+&nbsp; </span><span class="kwd">use</span><span class="pln"> epoll</span><span class="pun">;</span><span class="pln">
+&nbsp; worker_connections </span><span class="lit">65535</span><span class="pun">;</span><span class="pln">
+</span><span class="pun">}</span><span class="pln">
+http
+</span><span class="pun">{</span><span class="pln">
+&nbsp; include mime</span><span class="pun">.</span><span class="pln">types</span><span class="pun">;</span><span class="pln">
+&nbsp; default_type application</span><span class="pun">/</span><span class="pln">octet</span><span class="pun">-</span><span class="pln">stream</span><span class="pun">;</span><span class="pln">
+&nbsp; log_format main &nbsp;</span><span class="str">'$remote_addr - $remote_user [$time_local] "$request" '</span><span class="pln">
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="str">'$status $body_bytes_sent "$http_referer" '</span><span class="pln">
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</span><span class="str">'"$http_user_agent" $http_x_forwarded_for'</span><span class="pun">;</span><span class="pln">
+&nbsp;&nbsp;
+</span><span class="com">#charset gb2312;</span><span class="pln">
+&nbsp; &nbsp; &nbsp;
+&nbsp; server_names_hash_bucket_size </span><span class="lit">128</span><span class="pun">;</span><span class="pln">
+&nbsp; client_header_buffer_size </span><span class="lit">32k</span><span class="pun">;</span><span class="pln">
+&nbsp; large_client_header_buffers </span><span class="lit">4</span><span class="pln"> </span><span class="lit">32k</span><span class="pun">;</span><span class="pln">
+&nbsp; client_max_body_size </span><span class="lit">8m</span><span class="pun">;</span><span class="pln">
+&nbsp; &nbsp; &nbsp;
+&nbsp; sendfile on</span><span class="pun">;</span><span class="pln">
+&nbsp; tcp_nopush on</span><span class="pun">;</span><span class="pln">
+&nbsp; keepalive_timeout </span><span class="lit">60</span><span class="pun">;</span><span class="pln">
+&nbsp; tcp_nodelay on</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_connect_timeout </span><span class="lit">300</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_send_timeout </span><span class="lit">300</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_read_timeout </span><span class="lit">300</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_buffer_size </span><span class="lit">64k</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_buffers </span><span class="lit">4</span><span class="pln"> </span><span class="lit">64k</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_busy_buffers_size </span><span class="lit">128k</span><span class="pun">;</span><span class="pln">
+&nbsp; fastcgi_temp_file_write_size </span><span class="lit">128k</span><span class="pun">;</span><span class="pln">
+&nbsp; gzip on</span><span class="pun">;</span><span class="pln">&nbsp;
+&nbsp; gzip_min_length </span><span class="lit">1k</span><span class="pun">;</span><span class="pln">
+&nbsp; gzip_buffers </span><span class="lit">4</span><span class="pln"> </span><span class="lit">16k</span><span class="pun">;</span><span class="pln">
+&nbsp; gzip_http_version </span><span class="lit">1.0</span><span class="pun">;</span><span class="pln">
+&nbsp; gzip_comp_level </span><span class="lit">2</span><span class="pun">;</span><span class="pln">
+&nbsp; gzip_types text</span><span class="pun">/</span><span class="pln">plain application</span><span class="pun">/</span><span class="pln">x</span><span class="pun">-</span><span class="pln">javascript text</span><span class="pun">/</span><span class="pln">css application</span><span class="pun">/</span><span class="pln">xml</span><span class="pun">;</span><span class="pln">
+&nbsp; gzip_vary on</span><span class="pun">;</span><span class="pln">
+&nbsp;
+&nbsp; </span><span class="com">#limit_zone crawler $binary_remote_addr 10m;</span><span class="pln">
+&nbsp;</span><span class="com">#下面是server虚拟主机的配置</span><span class="pln">
+&nbsp;server
+&nbsp; </span><span class="pun">{</span><span class="pln">
+&nbsp; &nbsp; listen </span><span class="lit">80</span><span class="pun">;#监听端口</span><span class="pln">
+&nbsp; &nbsp; server_name localhost</span><span class="pun">;#域名</span><span class="pln">
+&nbsp; &nbsp; index index</span><span class="pun">.</span><span class="pln">html index</span><span class="pun">.</span><span class="pln">htm index</span><span class="pun">.</span><span class="pln">php</span><span class="pun">;</span><span class="pln">
+&nbsp; &nbsp; root </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">html</span><span class="pun">;#站点目录</span><span class="pln">
+&nbsp; &nbsp; &nbsp; location </span><span class="pun">~</span><span class="pln"> </span><span class="pun">.*</span><span class="pln">\.</span><span class="pun">(</span><span class="pln">php</span><span class="pun">|</span><span class="pln">php5</span><span class="pun">)?</span><span class="pln">$
+&nbsp; &nbsp; </span><span class="pun">{</span><span class="pln">
+&nbsp; &nbsp; &nbsp; </span><span class="com">#fastcgi_pass unix:/tmp/php-cgi.sock;</span><span class="pln">
+&nbsp; &nbsp; &nbsp; fastcgi_pass </span><span class="lit">127.0</span><span class="pun">.</span><span class="lit">0.1</span><span class="pun">:</span><span class="lit">9000</span><span class="pun">;</span><span class="pln">
+&nbsp; &nbsp; &nbsp; fastcgi_index index</span><span class="pun">.</span><span class="pln">php</span><span class="pun">;</span><span class="pln">
+&nbsp; &nbsp; &nbsp; include fastcgi</span><span class="pun">.</span><span class="pln">conf</span><span class="pun">;</span><span class="pln">
+&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln">
+&nbsp; &nbsp; location </span><span class="pun">~</span><span class="pln"> </span><span class="pun">.*</span><span class="pln">\.</span><span class="pun">(</span><span class="pln">gif</span><span class="pun">|</span><span class="pln">jpg</span><span class="pun">|</span><span class="pln">jpeg</span><span class="pun">|</span><span class="pln">png</span><span class="pun">|</span><span class="pln">bmp</span><span class="pun">|</span><span class="pln">swf</span><span class="pun">|</span><span class="pln">ico</span><span class="pun">)</span><span class="pln">$
+&nbsp; &nbsp; </span><span class="pun">{</span><span class="pln">
+&nbsp; &nbsp; &nbsp; expires </span><span class="lit">30d</span><span class="pun">;</span><span class="pln">
+&nbsp; </span><span class="com"># access_log off;</span><span class="pln">
+&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln">
+&nbsp; &nbsp; location </span><span class="pun">~</span><span class="pln"> </span><span class="pun">.*</span><span class="pln">\.</span><span class="pun">(</span><span class="pln">js</span><span class="pun">|</span><span class="pln">css</span><span class="pun">)?</span><span class="pln">$
+&nbsp; &nbsp; </span><span class="pun">{</span><span class="pln">
+&nbsp; &nbsp; &nbsp; expires </span><span class="lit">15d</span><span class="pun">;</span><span class="pln">
+&nbsp; &nbsp;</span><span class="com"># access_log off;</span><span class="pln">
+&nbsp; &nbsp; </span><span class="pun">}</span><span class="pln">
+&nbsp; &nbsp; access_log off</span><span class="pun">;</span><span class="pln">
+&nbsp; </span><span class="pun">}</span><span class="pln">
+
+</span><span class="pun">}</span></pre>
+    <p>
+        检查配置文件nginx.conf的正确性命令：
+    </p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;conf</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">-</span><span class="pln">t</span></pre>
+    <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx5.png">
+    <hr>
+    <h2>启动 Nginx</h2>
+    <p>Nginx 启动命令如下：</p>
+    <pre class="prettyprint prettyprinted" style=""><span class="pun">[</span><span class="pln">root@bogon&nbsp;conf</span><span class="pun">]#</span><span class="pln"> </span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx</span></pre>
+    <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx6.png">
+    <hr><h2>
+    访问站点</h2>
+    <p>从浏览器访问我们配置的站点ip：</p>
+    <img src="//www.runoob.com/wp-content/uploads/2015/01/nginx7.png">
+    <hr><h2>Nginx 其他命令</h2>
+    <p>以下包含了 Nginx 常用的几个命令：</p>
+    <pre class="prettyprint prettyprinted" style=""><span class="str">/usr/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">-</span><span class="pln">s reload            </span><span class="com"># 重新载入配置文件</span><span class="pln">
+</span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">-</span><span class="pln">s reopen            </span><span class="com"># 重启 Nginx</span><span class="pln">
+</span><span class="pun">/</span><span class="pln">usr</span><span class="pun">/</span><span class="kwd">local</span><span class="pun">/</span><span class="pln">webserver</span><span class="pun">/</span><span class="pln">nginx</span><span class="pun">/</span><span class="pln">sbin</span><span class="pun">/</span><span class="pln">nginx </span><span class="pun">-</span><span class="pln">s stop              </span><span class="com"># 停止 Nginx</span></pre>
+
+    <!-- 其他扩展 -->
+
+</div>
