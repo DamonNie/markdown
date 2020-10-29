@@ -1,85 +1,13 @@
-# Nginx 安装配置
-![](//www.runoob.com/wp-content/uploads/2015/01/nginx.jpg "")
-Nginx("engine x")是一款是由俄罗斯的程序设计师Igor Sysoev所开发高性能的 Web和 反向代理 服务器，也是一个 IMAP/POP3/SMTP 代理服务器。
-在高连接并发的情况下，Nginx是Apache服务器不错的替代品。
----
-## Nginx 安装
-系统平台：CentOS release 6.6 (Final) 64位。
-### 一、安装编译工具及库文件
-`yum-y install make zlib zlib-devel gcc-c++libtool  openssl openssl-devel`### 二、首先要安装 PCRE
-PCRE 作用是让 Nginx 支持 Rewrite 功能。1、下载 PCRE 安装包，下载地址： [http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz](http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz "")
-```
-[root@bogon src]#cd/usr/local/src/
-[root@bogon src]#wget http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz
-```
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx1.png "")
-2、解压安装包:
-```
-[root@bogon src]#tar zxvf pcre-8.35.tar.gz
-```
-3、进入安装包目录
-```
-[root@bogon src]#cd pcre-8.35
-```
-4、编译安装 
-```
-[root@bogon pcre-8.35]#./configure
-[root@bogon pcre-8.35]#make &&make install
-```
-5、查看pcre版本
-```
-[root@bogon pcre-8.35]#pcre-config--version
-```
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx2.png "")
-### 安装 Nginx
-1、下载 Nginx，下载地址：[http://nginx.org/download/nginx-1.6.2.tar.gz](http://nginx.org/download/nginx-1.6.2.tar.gz "")
-`[root@bogon src]#cd/usr/local/src/[root@bogon src]
-#wget http://nginx.org/download/nginx-1.6.2.tar.gz`
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx3.png "")
- 2、解压安装包
-`[root@bogon src]#tar zxvf nginx-1.6.2.tar.gz`
-3、进入安装包目录
-`[root@bogon src]#cd nginx-1.6.2`
-4、编译安装
-`
-[root@bogon nginx-1.6.2]#./configure--prefix=/usr/local/webserver/nginx--with-http_stub_status_module--with-http_ssl_module--with-pcre=/usr/local/src/pcre-8.35[root@bogon nginx-1.6.2]#make[root@bogon nginx-1.6.2]#make install`
-5、查看nginx版本
-`
-[root@bogon nginx-1.6.2]#/usr/local/webserver/nginx/sbin/nginx-v
-`
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx4.png "")
-到此，nginx安装完成。
----
-## Nginx 配置
-创建 Nginx 运行使用的用户 www：
-`[root@bogon conf]#/usr/sbin/groupadd www [root@bogon conf]#/usr/sbin/useradd-g www www`
-配置nginx.conf
-        ，将/usr/local/webserver/nginx/conf/nginx.conf替换为以下内容
 
-`[root@bogon conf]# cat/usr/local/webserver/nginx/conf/nginx.conf
-
-user www www;worker_processes2;#设置值和CPU核心数一致error_log/usr/local/webserver/nginx/logs/nginx_error.log crit;#日志位置和日志级别pid/usr/local/webserver/nginx/nginx.pid;#Specifies the value for maximum file descriptors that can be opened by this process.worker_rlimit_nofile65535;events{ useepoll;  worker_connections65535;}http{  include mime.types;  default_type application/octet-stream;  log_format main  '$remote_addr - $remote_user [$time_local] "$request" '               '$status $body_bytes_sent "$http_referer" '               '"$http_user_agent" $http_x_forwarded_for';  #charset gb2312;     
-  server_names_hash_bucket_size128;  client_header_buffer_size32k;  large_client_header_buffers432k;  client_max_body_size8m;     
-  sendfile on;  tcp_nopush on;  keepalive_timeout60;  tcp_nodelay on;  fastcgi_connect_timeout300;  fastcgi_send_timeout300;  fastcgi_read_timeout300;  fastcgi_buffer_size64k;  fastcgi_buffers464k;  fastcgi_busy_buffers_size128k;  fastcgi_temp_file_write_size128k;  gzip on; 
-  gzip_min_length1k;  gzip_buffers416k;  gzip_http_version1.0;  gzip_comp_level2;  gzip_types text/plain application/x-javascript text/css application/xml;  gzip_vary on; 
- #limit_zone crawler $binary_remote_addr 10m; #下面是server虚拟主机的配置 server
- {    listen80;#监听端口    server_name localhost;#域名    index index.html index.htm index.php;    root/usr/local/webserver/nginx/html;#站点目录      location~.*\.(php|php5)?$
-   {     #fastcgi_pass unix:/tmp/php-cgi.sock;      fastcgi_pass127.0.0.1:9000;      fastcgi_index index.php;      include fastcgi.conf;   }    location~.*\.(gif|jpg|jpeg|png|bmp|swf|ico)$
-   {      expires30d; # access_log off;   }    location~.*\.(js|css)?$
-   {      expires15d;   # access_log off;   }    access_log off; }}`
-检查配置文件nginx.conf的正确性命令：
-`[root@bogon conf]#/usr/local/webserver/nginx/sbin/nginx-t`
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx5.png "")
----
-## 启动 Nginx
-Nginx 启动命令如下：
-`[root@bogon conf]#/usr/local/webserver/nginx/sbin/nginx`
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx6.png "")
----## 访问站点
-从浏览器访问我们配置的站点ip：
-![](http://www.runoob.com/wp-content/uploads/2015/01/nginx7.png "")
----## Nginx 其他命令
-以下包含了 Nginx 常用的几个命令：
-`/usr/local/webserver/nginx/sbin/nginx-s reload# 重新载入配置文件/usr/local/webserver/nginx/sbin/nginx-s reopen# 重启 Nginx/usr/local/webserver/nginx/sbin/nginx-s stop# 停止 Nginx`
-
-    <!-- 其他扩展 -->
+## 第一次握手
+客户端调用connect，向服务端发送连接请求报文。该报文是一个特殊报文，报文首部同步位SYN=1，同时确认位ACK=0，seq=x表示确认字段的值为x,该字段值由客户端选择，表示客户端向服务端发送数据的第一个字节编号为x+1。连接报文发送后，客户端的TCP连接状态由CLOSED转为SYN_SENT。
+服务端调用accept，从lisent的连接请求队列中取出一个连接请求，并为之创建套接字和分配资源，开始建立连接。服务端的TCP连接状态由LISENT转为SYN_RCVD。
+![](https://images2015.cnblogs.com/blog/922521/201604/922521-20160403221639832-1660045017.png "")
+## 第二次握手
+服务端为连接分配资源，同意连接，向客户端发送SYN=1的确认报文。ACK=1表示确认号字段ack的值有效，ack=x+1表示希望收到第一个字节编号为x+1的若干数据，seq=y表示服务端向客户端发送数据的起始字节编号为y+1。客户端收到确认，TCP连接状态由SYN_SENT转为ESTABLISHED。
+        <ins class="adsbygoogle" style="display: block; text-align: center; height: 0px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-4353345653789615" data-ad-slot="8840342077" data-adsbygoogle-status="done"><ins id="aswift_2_expand" style="display: inline-table; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent;"><ins id="aswift_2_anchor" style="display: block; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent; overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 1, 1) 0s, width 0.2s cubic-bezier(0.4, 0, 1, 1) 0.3s, height 0.5s cubic-bezier(0.4, 0, 1, 1) 0s; opacity: 0;"><iframe id="aswift_2" name="aswift_2" style="left:0;position:absolute;top:0;border:0;width:758px;height:190px;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="758" height="190" frameborder="0" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-4353345653789615&output=html&h=190&slotname=8840342077&adk=3697260208&adf=3964066570&pi=t.ma~as.8840342077&w=758&fwrn=4&lmt=1603971246&rafmt=11&psa=1&guci=2.2.0.0.2.2.0.0&format=758x190&url=https%3A%2F%2Fwww.itdaan.com%2Fblog%2F2016%2F04%2F03%2F730973.html&flash=0&wgl=1&uach=WyJXaW5kb3dzIiwiMTAuMCIsIng4NiIsIiIsIjg2LjAuNDI0MC4xMTEiLFtdXQ..&dt=1603971245537&bpp=31&bdt=2527&idt=1381&shv=r20201026&cbv=r20190131&ptt=9&saldr=aa&abxe=1&cookie=ID%3Da66fbb80511ede41%3AT%3D1602233265%3AS%3DALNI_MZ73Uwmxlqb4DFqudgmjmWVvF10xQ&prev_fmts=0x0%2C758x280&nras=1&correlator=8692668694627&frm=20&pv=1&ga_vid=121663445.1602233266&ga_sid=1603971246&ga_hid=1741598035&ga_fc=0&iag=0&icsg=42081276&dssz=23&mdo=0&mso=8&rplot=4&u_tz=480&u_his=1&u_java=0&u_h=1080&u_w=1920&u_ah=1040&u_aw=1920&u_cd=24&u_nplug=3&u_nmime=4&adx=373&ady=1406&biw=1903&bih=937&scr_x=0&scr_y=0&eid=21067467%2C21068084%2C21067494&oid=3&pvsid=4225567025507134&pem=356&rx=0&eae=0&fc=1920&brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C1040%2C1920%2C937&vis=1&rsz=%7C%7CoeEbr%7C&abl=CS&pfx=0&fu=8328&bc=31&ifi=2&uci=a!2&btvi=1&fsb=1&xpc=kSxf7Z4d2P&p=https%3A//www.itdaan.com&dtd=1474" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" data-google-container-id="a!2" data-google-query-id="CKa7tcTa2ewCFcSqcQodSiUCmQ" data-load-complete="true"></iframe></ins></ins></ins>
+        <script>     (adsbygoogle = window.adsbygoogle || []).push({});</script>
+## 第三次握手
+客户端TCP连接状态转为ESTABLISHED，立即向服务器发送确认报文，connect函数返回，连接建立成功。
+服务端收到客户端的确认报文，TCP连接状态由SYN_RCVD转为ESTABLISHED，accept函数返回。
+至此一个连接的三次握手结束，连接建立，客户端可以和服务端进行可靠通信。
