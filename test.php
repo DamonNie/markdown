@@ -12,25 +12,11 @@ require_once "./vendor/autoload.php";
 
 use damon\src\ext\File;
 use damon\src\Custom;
-$input = "<?php
-/**
- * Created by PhpStorm.
- * User: Damon
- * Date: 2017/7/3
- * Time: 11:12
- */
-//增加一个入口常量，用于判断是否有权限直接进入其它文件
-define('ACCESS', TRUE);
-//加载初始化类
-include_once 'Core/Common/functions.php';
-include_once 'Core/App.class.php';
-//进入到初始化类
-\Core\App::run();    //由于采用命名空间，因此访问类的时候必须带上空间";
-//$str = preg_match_all("/([\x{4e00}-\x{9fa5}])/u", $input, $match);
+
 set_time_limit(0);
-$path = 'C:\Users\W9004022\Desktop\oppo\test';
-$data = (new File())->generateEncryptFiles($path);
-$path = 'C:\Users\W9004022\Desktop\oppo\testcopy';
+//$path = 'C:\Users\W9004022\Desktop\permission';
+//$data = (new File())->generateEncryptFiles($path);
+$path = 'C:\Users\W9004022\Desktop\permissioncopy';
 $data = (new File())->generateDecryptFiles($path);
 
 

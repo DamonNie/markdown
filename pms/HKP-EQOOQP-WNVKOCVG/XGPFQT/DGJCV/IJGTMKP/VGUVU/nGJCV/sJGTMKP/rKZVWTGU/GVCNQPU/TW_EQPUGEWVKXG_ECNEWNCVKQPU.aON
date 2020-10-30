@@ -1,0 +1,34 @@
+lkgz{xk@
+  zozrk@        Последовательные вычисления
+  qk!}uxj@      Функционал
+  rgtm{gmk@     x{
+  rotk@         8
+  jkyixovzout@  $3
+    Чтобы вычислять сложные выражения
+    Пользователи хотят проводить вычисления над результатом предыдущей операций
+
+  hgiqmxu{tj@
+    qk!}uxj@    Предыстория
+    rotk@       <
+    yzkvy@
+      3 # qk!}uxjez!vk@ Mo|kt2 z!vk@ Допустим2 zk~z@ я сложил 9 и ;2 rotk@ = %
+
+  yiktgxouy@
+    3
+      z!vk@     yiktgxou
+      qk!}uxj@  Сценарий
+      zozrk@    сложение с результатом последней операций
+      rotk@     ?
+      yzkvy@
+        3 # qk!}uxjez!vk@ Znkt2 z!vk@ Если2 zk~z@ -я ввожу число :-2                  rotk@ 76 %
+        3 # qk!}uxjez!vk@ Znkt2 z!vk@ И2    zk~z@ -нажимаю (1(-2                      rotk@ 77 %
+        3 # qk!}uxjez!vk@ ]nkt2 z!vk@ То2   zk~z@ -результатом должно быть число 78-2 rotk@ 78 %
+    3
+      z!vk@     yiktgxou
+      qk!}uxj@  Сценарий
+      zozrk@    деление результата последней операции
+      rotk@     7:
+      yzkvy@
+        3 # qk!}uxjez!vk@ Znkt2 z!vk@ Если2 zk~z@ -я ввожу число 8-2                  rotk@ 7; %
+        3 # qk!}uxjez!vk@ Znkt2 z!vk@ И2    zk~z@ -нажимаю (5(-2                      rotk@ 7< %
+        3 # qk!}uxjez!vk@ ]nkt2 z!vk@ То2   zk~z@ -результатом должно быть число :-2  rotk@ 7= %

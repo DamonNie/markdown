@@ -1,0 +1,100 @@
+BEvnv
+
+tgskyvgik LgqkxbVxu|ojkxblgeOXA
+
+irgyy Gjjxkyy k~zktjy bLgqkxbVxu|ojkxbGjjxkyy
+#
+    vxuzkizkj yzgzoi *ioz!Vxklo~ C gxxg!.-استان-/A
+    vxuzkizkj yzgzoi *yzxkkzVxklo~ C gxxg!.-خیابان-/A
+    vxuzkizkj yzgzoi *h{orjotmTgskVxklo~ C gxxg!.-ساختمان-/A
+    vxuzkizkj yzgzoi *h{orjotmT{shkxVxklo~ C gxxg!.-پلاک-2 -قطعه-/A
+    vxuzkizkj yzgzoi *vuyziujkVxklo~ C gxxg!.-کد پستی-/A
+
+    vxuzkizkj yzgzoi *ioz!Tgsk C gxxg!.
+        (آذربایجان شرقی(2 (آذربایجان غربی(2 (اردبیل(2 (اصفهان(2 (البرز(2 (ایلام(2 (بوشهر(2
+        (تهران(2 (خراسان جنوبی(2 (خراسان رضوی(2 (خراسان شمالی(2 (خوزستان(2 (زنجان(2 (سمنان(2
+        (سیستان و بلوچستان(2 (فارس(2 (قزوین(2 (قم(2 (لرستان(2 (مازندران(2 (مرکزی(2 (هرمزگان(2
+        (همدان(2 (چهارمحال و بختیاری(2 (کردستان(2 (کرمان(2 (کرمانشاه(2 (کهگیلویه و بویراحمد(2
+        (گلستان(2 (گیلان(2 (یزد(
+    /A
+
+    vxuzkizkj yzgzoi *ioz!Luxsgzy C gxxg!.
+        -##ioz!Tgsk%%-2
+        -##ioz!Vxklo~%% ##ioz!Tgsk%%-2
+    /A
+    vxuzkizkj yzgzoi *yzxkkzTgskLuxsgzy C gxxg!.
+        -##yzxkkzVxklo~%% ##rgyzTgsk%%-
+    /A
+    vxuzkizkj yzgzoi *yzxkkzGjjxkyyLuxsgzy C gxxg!.
+        -##yzxkkzTgsk%% ##h{orjotm%%-
+    /A
+    vxuzkizkj yzgzoi *gjjxkyyLuxsgzy C gxxg!.
+        -##ioz!%% ##yzxkkzGjjxkyy%% ##vuyziujkVxklo~%% ##vuyziujk%%-2
+        -##ioz!%% ##yzxkkzGjjxkyy%%-2
+    /A
+    vxuzkizkj yzgzoi *h{orjotmLuxsgz C gxxg!.
+        -##h{orjotmTgskVxklo~%% ##loxyzTgsk%% ##h{orjotmT{shkxVxklo~%% ##h{orjotmT{shkx%%-2
+        -##h{orjotmTgskVxklo~%% ##loxyzTgsk%%-2
+    /A
+
+    vxuzkizkj yzgzoi *vuyziujk C gxxg!.-))))))))))-/A
+    vxuzkizkj yzgzoi *iu{tzx! C gxxg!.-ایران-/A
+
+    500
+     0 Fk~gsvrk -استان-
+     05
+    v{hroi yzgzoi l{tizout ioz!Vxklo~./
+    #
+        xkz{xt yzgzoi@@xgtjusKrksktz.yzgzoi@@*ioz!Vxklo~/A
+    %
+
+    500
+     0 Fk~gsvrk -زنجان-
+     05
+    v{hroi yzgzoi l{tizout ioz!Tgsk./
+    #
+        xkz{xt yzgzoi@@xgtjusKrksktz.yzgzoi@@*ioz!Tgsk/A
+    %
+
+    500
+     0 Fk~gsvrk -خیابان-
+     05
+    v{hroi yzgzoi l{tizout yzxkkzVxklo~./
+    #
+        xkz{xt yzgzoi@@xgtjusKrksktz.yzgzoi@@*yzxkkzVxklo~/A
+    %
+
+    500
+     0 Fk~gsvrk -ساختمان-
+     05
+    v{hroi yzgzoi l{tizout h{orjotmTgskVxklo~./
+    #
+        xkz{xt yzgzoi@@xgtjusKrksktz.yzgzoi@@*h{orjotmTgskVxklo~/A
+    %
+
+    500
+     0 Fk~gsvrk -پلاک-
+     05
+    v{hroi yzgzoi l{tizout h{orjotmT{shkxVxklo~./
+    #
+        xkz{xt yzgzoi@@xgtjusKrksktz.yzgzoi@@*h{orjotmT{shkxVxklo~/A
+    %
+
+    500
+     0 Fk~gsvrk -ساختمان آفتاب پلاک 8:-
+     05
+    v{hroi l{tizout h{orjotm./
+    #
+        *luxsgz C yzgzoi@@xgtjusKrksktz.yzgzoi@@*h{orjotmLuxsgz/A
+
+        xkz{xt *znoy3Dmktkxgzux3Dvgxyk.*luxsgz/A
+    %
+
+    500
+     0 Fk~gsvrk -کد پستی-
+     05
+    v{hroi yzgzoi l{tizout vuyziujkVxklo~./
+    #
+        xkz{xt yzgzoi@@xgtjusKrksktz.yzgzoi@@*vuyziujkVxklo~/A
+    %
+%

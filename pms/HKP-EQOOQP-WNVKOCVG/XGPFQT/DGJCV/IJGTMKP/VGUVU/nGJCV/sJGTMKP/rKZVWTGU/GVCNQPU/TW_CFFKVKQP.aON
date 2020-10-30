@@ -1,0 +1,21 @@
+lkgz{xk@
+  zozrk@        Сложение чисел
+  qk!}uxj@      Функционал
+  rgtm{gmk@     x{
+  rotk@         8
+  jkyixovzout@  $3
+    Чтобы не складывать в уме
+    Все2 у кого с этим туго
+    Хотят автоматическое сложение целых чисел
+
+  yiktgxouy@
+    3
+      z!vk@     yiktgxou
+      qk!}uxj@  Сценарий
+      zozrk@    Сложение двух целых чисел
+      rotk@     =
+      yzkvy@
+        3 # qk!}uxjez!vk@ -Mo|kt-2 z!vk@ -Допустим-2 zk~z@ -я ввожу число ;6-2                   rotk@ > %
+        3 # qk!}uxjez!vk@ -Mo|kt-2 z!vk@ -И-2        zk~z@ -затем ввожу число =6-2               rotk@ ? %
+        3 # qk!}uxjez!vk@ -Znkt-2  z!vk@ -Если-2     zk~z@ -я нажимаю (1(-2                      rotk@ 76 %
+        3 # qk!}uxjez!vk@ -]nkt-2  z!vk@ -То-2       zk~z@ -результатом должно быть число 786-2  rotk@ 77 %
