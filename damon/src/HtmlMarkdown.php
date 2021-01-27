@@ -77,11 +77,12 @@ class HtmlMarkdown extends Parse
             ["#[ ]*<tbody[^>]*?>(.*?)</tbody>#is", '$1', '</tbody>'],
             ["#[ ]*<header[^>]*?>(.*?)</header>#is", '$1', '</header>'],
             ["#[ ]*<time[^>]*?>(.*?)</time>#is", '$1', '</time>'],
+            ["#[ ]*<center[^>]*?>(.*?)</center>#is", '$1', '</center>'],
             //处理p code标签
-            ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```".PHP_EOL."$2".PHP_EOL."```", '</code></pre>'],
+            ['#[ ]*<pre[^>]*?>(.*?)<code[^>]*?>(.*?)</code[^<]*?>(.*?)</pre>#is', "```".PHP_EOL."$2".PHP_EOL."```".PHP_EOL, '</code></pre>'],
             ['#[ ]*<code[^>]*?>(.*?)</code>#is', "`$1`", '</code>'],
             ['#[ ]*<pre[^>]*?>(.*?)</pre>#is', "`$1`", '</pre>'],
-            ["#[ ]*<p[^>]*?>(.*?)</p>#is", '$1', 'p>'],
+            ["#[ ]*<p[^>]*?>(.*?)</p>#is", '$1'.PHP_EOL, 'p>'],
             //处理strong标签
             ["#[ ]*<strong[^>]*?>(\s*)?(.*?)</strong>#is", "**$2**", '</strong>'],
             ["#[ ]*<b[^>]*?>(\s*)?(.*?)</b>#is", "**$2**", '</b>'],

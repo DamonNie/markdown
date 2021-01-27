@@ -1,24 +1,65 @@
+# HashMap 和 ConcurrentHashMap 实现原理
+哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表，而HashMap的实现原理也常常出现在各类的面试题中，重要性可见一斑。
 
-## 第一次握手
-客户端调用connect，向服务端发送连接请求报文。该报文是一个特殊报文，报文首部同步位SYN=1，同时确认位ACK=0，seq=x表示确认字段的值为x,该字段值由客户端选择，表示客户端向服务端发送数据的第一个字节编号为x+1。连接报文发送后，客户端的TCP连接状态由CLOSED转为SYN_SENT。
-服务端调用accept，从lisent的连接请求队列中取出一个连接请求，并为之创建套接字和分配资源，开始建立连接。服务端的TCP连接状态由LISENT转为SYN_RCVD。
-![](https://images2015.cnblogs.com/blog/922521/201604/922521-20160403221639832-1660045017.png "")
-## 第二次握手
-服务端为连接分配资源，同意连接，向客户端发送SYN=1的确认报文。ACK=1表示确认号字段ack的值有效，ack=x+1表示希望收到第一个字节编号为x+1的若干数据，seq=y表示服务端向客户端发送数据的起始字节编号为y+1。客户端收到确认，TCP连接状态由SYN_SENT转为ESTABLISHED。
-        <ins class="adsbygoogle" style="display: block; text-align: center; height: 0px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-4353345653789615" data-ad-slot="8840342077" data-adsbygoogle-status="done"><ins id="aswift_2_expand" style="display: inline-table; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent;"><ins id="aswift_2_anchor" style="display: block; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent; overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 1, 1) 0s, width 0.2s cubic-bezier(0.4, 0, 1, 1) 0.3s, height 0.5s cubic-bezier(0.4, 0, 1, 1) 0s; opacity: 0;"><iframe id="aswift_2" name="aswift_2" style="left:0;position:absolute;top:0;border:0;width:758px;height:190px;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="758" height="190" frameborder="0" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-4353345653789615&output=html&h=190&slotname=8840342077&adk=3697260208&adf=3964066570&pi=t.ma~as.8840342077&w=758&fwrn=4&lmt=1603971246&rafmt=11&psa=1&guci=2.2.0.0.2.2.0.0&format=758x190&url=https%3A%2F%2Fwww.itdaan.com%2Fblog%2F2016%2F04%2F03%2F730973.html&flash=0&wgl=1&uach=WyJXaW5kb3dzIiwiMTAuMCIsIng4NiIsIiIsIjg2LjAuNDI0MC4xMTEiLFtdXQ..&dt=1603971245537&bpp=31&bdt=2527&idt=1381&shv=r20201026&cbv=r20190131&ptt=9&saldr=aa&abxe=1&cookie=ID%3Da66fbb80511ede41%3AT%3D1602233265%3AS%3DALNI_MZ73Uwmxlqb4DFqudgmjmWVvF10xQ&prev_fmts=0x0%2C758x280&nras=1&correlator=8692668694627&frm=20&pv=1&ga_vid=121663445.1602233266&ga_sid=1603971246&ga_hid=1741598035&ga_fc=0&iag=0&icsg=42081276&dssz=23&mdo=0&mso=8&rplot=4&u_tz=480&u_his=1&u_java=0&u_h=1080&u_w=1920&u_ah=1040&u_aw=1920&u_cd=24&u_nplug=3&u_nmime=4&adx=373&ady=1406&biw=1903&bih=937&scr_x=0&scr_y=0&eid=21067467%2C21068084%2C21067494&oid=3&pvsid=4225567025507134&pem=356&rx=0&eae=0&fc=1920&brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C1040%2C1920%2C937&vis=1&rsz=%7C%7CoeEbr%7C&abl=CS&pfx=0&fu=8328&bc=31&ifi=2&uci=a!2&btvi=1&fsb=1&xpc=kSxf7Z4d2P&p=https%3A//www.itdaan.com&dtd=1474" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" data-google-container-id="a!2" data-google-query-id="CKa7tcTa2ewCFcSqcQodSiUCmQ" data-load-complete="true"></iframe></ins></ins></ins>
-        <script>     (adsbygoogle = window.adsbygoogle || []).push({});</script>
-## 第三次握手
-客户端TCP连接状态转为ESTABLISHED，立即向服务器发送确认报文，connect函数返回，连接建立成功。
-服务端收到客户端的确认报文，TCP连接状态由SYN_RCVD转为ESTABLISHED，accept函数返回。
-至此一个连接的三次握手结束，连接建立，客户端可以和服务端进行可靠通信。
+### 什么是哈希表
+在讨论哈希表之前，我们先大概了解下其他数据结构在新增，查找等基础操作执行性能
 
+**数组**：采用一段连续的存储单元来存储数据。对于指定下标的查找，时间复杂度为O(1)；通过给定值进行查找，需要遍历数组，逐一比对给定关键字和数组元素，时间复杂度为O(n)，当然，对于有序数组，则可采用二分查找，插值查找，斐波那契查找等方式，可将查找复杂度提高为O(logn)；对于一般的插入删除操作，涉及到数组元素的移动，其平均复杂度也为O(n)
 
-## 四次握手断开连接： 
+**线性链表**：对于链表的新增，删除等操作（在找到指定操作位置后），仅需处理结点间的引用即可，时间复杂度为O(1)，而查找操作需要遍历链表逐一进行比对，复杂度为O(n)
 
-第一次挥手：主动关闭方发送一个FIN，用来关闭主动方到被动关闭方的数据传送，也就是主动关闭方告诉被动关闭方：我已经不会再给你发数据了(当然，在fin包之前发送出去的数据，如果没有收到对应的ack确认报文，主动关闭方依然会重发这些数据)，但此时主动关闭方还可以接受数据。
+**二叉树**：对一棵相对平衡的有序二叉树，对其进行插入，查找，删除等操作，平均复杂度均为O(logn)。
 
-第二次挥手：被动关闭方收到FIN包后，发送一个ACK给对方，确认序号为收到序号+1（与SYN相同，一个FIN占用一个序号）。
+**哈希表**：相比上述几种数据结构，在哈希表中进行添加，删除，查找等操作，性能十分之高，不考虑哈希冲突的情况下，仅需一次定位即可完成，时间复杂度为O(1)，接下来我们就来看看哈希表是如何实现达到惊艳的常数阶O(1)的。
 
-第三次挥手：被动关闭方发送一个FIN，用来关闭被动关闭方到主动关闭方的数据传送，也就是告诉主动关闭方，我的数据也发送完了，不会再给你发数据了。
+我们知道，数据结构的物理存储结构只有两种：**顺序存储结构**和**链式存储结构**（像栈，队列，树，图等是从逻辑结构去抽象的，映射到内存中，也这两种物理组织形式），而在上面我们提到过，在数组中根据下标查找某个元素，一次定位就可以达到，哈希表利用了这种特性，**哈希表的主干就是数组**。
 
-第四次挥手：主动关闭方收到FIN后，发送一个ACK给被动关闭方，确认序号为收到序号+1，至此，完成四次挥手。
+比如我们要新增或查找某个元素，我们通过把当前元素的关键字 通过某个函数映射到数组中的某个位置，通过数组下标一次定位就可完成操作。
+
+```
+存储位置 = f(关键字)
+```
+其中，这个函数f一般称为**哈希函数**，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：
+
+![](../assets/2019-03/HashTable.png "")
+
+查找操作同理，先通过哈希函数计算出实际存储地址，然后从数组中对应地址取出即可。
+
+### 哈希冲突
+当我们对某个元素进行哈希运算，得到一个存储地址，然后要进行插入的时候，发现已经被其他元素占用了，其实这就是所谓的哈希冲突，也叫哈希碰撞。前面我们提到过，哈希函数的设计至关重要，好的哈希函数会尽可能地保证 计算简单和散列地址分布均匀,但是，我们需要清楚的是，数组是一块连续的固定长度的内存空间，再好的哈希函数也不能保证得到的存储地址绝对不发生冲突。那么哈希冲突如何解决呢？哈希冲突的解决方案有多种:**开放定址法**（发生冲突，继续寻找下一块未被占用的存储地址），**链地址法**，而HashMap即是采用了链地址法，也就是数组+链表的方式。
+
+### Java7 HashMap
+HashMap的主干是一个Entry数组。Entry是HashMap的基本组成单元，每一个Entry包含一个key-value键值对。
+
+![](../assets/2019-03/hashmap1.png "")
+
+简单来说，**HashMap由数组+链表组成的**，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的，如果定位到的数组位置不含链表（当前entry的next指向null）,那么对于查找，添加等操作很快，仅需一次寻址即可；如果定位到的数组包含链表，对于添加操作，其时间复杂度为O(n)，首先遍历链表，存在即覆盖，否则新增；对于查找操作来讲，仍需遍历链表，然后通过key对象的equals方法逐一比对查找。所以，性能考虑，**HashMap中的链表出现越少，性能才会越好**。
+
+当发生哈希冲突并且size大于阈值的时候，需要进行数组扩容，扩容时，需要新建一个长度为之前数组2倍的新的数组，然后将当前的Entry数组中的元素全部传输过去，扩容后的新数组长度为之前的2倍，所以扩容相对来说是个耗资源的操作。
+
+**构造HashMap的时候，默认数组长度16，所以最大下标为15，（二进制表示1111）。在进行与运算的时候结果分布更加均匀，减少了Hash冲突。在进行数组扩容的时候也应该选择2的倍数。**
+
+### Java8 HashMap
+![](../assets/2019-03/hashmap2.png "")
+
+Java7中使用Entry来代表每个HashMap中的数据节点，Java8中使用 Node，基本没有区别，都是key，value，hash和next这四个属性，不过，Node只能用于链表的情况，红黑树的情况需要使用TreeNode。
+
+我们根据数组元素中，第一个节点数据类型是 Node 还是 TreeNode 来判断该位置下是链表还是红黑树的。
+
+### Java7 ConcurrentHashMap
+ConcurrentHashMap和HashMap思路是差不多的，但是因为它支持并发操作，所以要复杂一些。
+
+![](../assets/2019-03/ConcurrentHashMap1.png "")
+
+整个ConcurrentHashMap由一个个Segment组成，Segment代表”部分“或”一段“的意思，所以很多地方都会将其描述为分段锁。
+
+简单理解就是，**ConcurrentHashMap是一个Segment数组，Segment通过继承ReentrantLock来进行加锁**，所以每次需要加锁的操作锁住的是一个segment，这样只要保证每个Segment是线程安全的，也就实现了全局的线程安全。
+
+**ConcurrentHashMap有16个Segments，所以理论上，这个时候，最多可以同时支持16个线程并发写，只要它们的操作分别分布在不同的Segment上。这个值可以在初始化的时候设置为其他值，但是一旦初始化以后，它是不可以扩容的。**
+
+### Java8 ConcurrentHashMap
+![](../assets/2019-03/ConcurrentHashMap2.png "")
+
+改进一：取消segments字段，直接采用transient volatile HashEntry<k,v>[] table保存数据，采用table数组元素作为锁，从而实现了对每一行数据进行加锁，进一步减少并发冲突的概率。</k,v>
+
+改进二：将原先table数组＋单向链表的数据结构，变更为table数组＋单向链表＋红黑树的结构。对于hash表来说，最核心的能力在于将key hash之后能均匀的分布在数组中。如果hash之后散列的很均匀，那么table数组中的每个队列长度主要为0或者1。但实际情况并非总是如此理想，虽然ConcurrentHashMap类默认的加载因子为0.75，但是在数据量过大或者运气不佳的情况下，还是会存在一些队列长度过长的情况，如果还是采用单向列表方式，那么查询某个节点的时间复杂度为O(n)；因此，对于个数超过8(默认值)的列表，jdk1.8中采用了红黑树的结构，那么查询的时间复杂度可以降低到O(logN)，可以改进性能。

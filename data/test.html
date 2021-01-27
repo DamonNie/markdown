@@ -1,74 +1,41 @@
-<div class="content_div" style="height: auto !important;">
-    <center>
+<section class="normal markdown-section">
 
-        <h3><a href="https://www.itdaan.com/blog/2016/04/03/730973.html" style="color:black">TCP的三次握手</a></h3>
-    </center>
-    <input type="hidden" name="voteNum" value="100">
-    <div class="postinfo">
-
-
-
-
-        本文转载自
-
-        <i class="icon-user"></i>&nbsp;<span>wan_ghuan</span>
-        <i class="icon-globe"></i>&nbsp;<a href="https://www.itdaan.com/go/aHR0cDovL3d3dy5jbmJsb2dzLmNvbS93YW5odWFuL3AvNTM1MDk4NS5odG1s" target="_blank">查看原文</a>
-
-        <i class="icon-time"></i>&nbsp;<span>2016-04-03</span>
-        <i class="icon-eye-open"></i>&nbsp;<span>9&nbsp;</span>
-
-        <i class="icon-tag"></i>&nbsp;
-
-
-
-        <span><a href="https://www.itdaan.com/tag/tcp.html" target="_blank">tcp</a>/</span>
-
-
-
-        <span><a href="https://www.itdaan.com/tag/三次握手.html" target="_blank">三次握手</a></span>
-
-
-        &nbsp;&nbsp;<!--<button class="btn btn-success btn-mini btn-collection">收藏</button>-->
-        &nbsp;&nbsp;<span id="votes" style="cursor: pointer;"><img alt="1" src="../../../../img/star-on.png?rand=1" title="很差 -2分">&nbsp;<img alt="2" src="../../../../img/star-on.png?rand=1" title="较差 -1分">&nbsp;<img alt="3" src="../../../../img/star-on.png?rand=1" title="一般 0分">&nbsp;<img alt="4" src="../../../../img/star-off.png?rand=1" title="还行 1分">&nbsp;<img alt="5" src="../../../../img/star-off.png?rand=1" title="很好 2分"><input name="score" type="hidden" value="3"></span>&nbsp;&nbsp;<span id="hint"></span>
-        &nbsp;&nbsp;
-        <!--
-        <button class="btn btn-danger btn-mini btn-delete" data-id="730973">删除</button>
-        -->
-    </div>
-    <hr>
-
-    <div class="ad_title_down" style="height: 0px;">
-        <input type="hidden" name="recommend_title" value="" id="recommend_title">
-        <input type="hidden" name="recommend_url" value="" id="recommend_url">
-        <!-- itdaan_横幅 -->
-        <ins class="adsbygoogle" style="display: block; height: 0px;" data-ad-client="ca-pub-4353345653789615" data-ad-slot="5202993478" data-ad-format="auto" data-full-width-responsive="true" data-adsbygoogle-status="done"><ins id="aswift_1_expand" style="display: inline-table; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent;"><ins id="aswift_1_anchor" style="display: block; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent; overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 1, 1) 0s, width 0.2s cubic-bezier(0.4, 0, 1, 1) 0.3s, height 0.5s cubic-bezier(0.4, 0, 1, 1) 0s; opacity: 0;"><iframe id="aswift_1" name="aswift_1" style="left:0;position:absolute;top:0;border:0;width:758px;height:280px;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="758" height="280" frameborder="0" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-4353345653789615&amp;output=html&amp;h=280&amp;slotname=5202993478&amp;adk=76023040&amp;adf=2693686656&amp;pi=t.ma~as.5202993478&amp;w=758&amp;fwrn=4&amp;fwrnh=100&amp;lmt=1603971246&amp;rafmt=1&amp;psa=1&amp;guci=2.2.0.0.2.2.0.0&amp;format=758x280&amp;url=https%3A%2F%2Fwww.itdaan.com%2Fblog%2F2016%2F04%2F03%2F730973.html&amp;flash=0&amp;fwr=0&amp;fwrattr=true&amp;rpe=1&amp;resp_fmts=3&amp;wgl=1&amp;uach=WyJXaW5kb3dzIiwiMTAuMCIsIng4NiIsIiIsIjg2LjAuNDI0MC4xMTEiLFtdXQ..&amp;dt=1603971245465&amp;bpp=72&amp;bdt=2454&amp;idt=1114&amp;shv=r20201026&amp;cbv=r20190131&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Da66fbb80511ede41%3AT%3D1602233265%3AS%3DALNI_MZ73Uwmxlqb4DFqudgmjmWVvF10xQ&amp;prev_fmts=0x0&amp;nras=1&amp;correlator=8692668694627&amp;frm=20&amp;pv=1&amp;ga_vid=121663445.1602233266&amp;ga_sid=1603971246&amp;ga_hid=1741598035&amp;ga_fc=0&amp;iag=0&amp;icsg=42081276&amp;dssz=23&amp;mdo=0&amp;mso=8&amp;u_tz=480&amp;u_his=1&amp;u_java=0&amp;u_h=1080&amp;u_w=1920&amp;u_ah=1040&amp;u_aw=1920&amp;u_cd=24&amp;u_nplug=3&amp;u_nmime=4&amp;adx=373&amp;ady=238&amp;biw=1903&amp;bih=937&amp;scr_x=0&amp;scr_y=0&amp;eid=21067467%2C21068084%2C21067494&amp;oid=3&amp;pvsid=4225567025507134&amp;pem=356&amp;rx=0&amp;eae=0&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C1040%2C1920%2C937&amp;vis=1&amp;rsz=%7C%7CoeE%7C&amp;abl=CS&amp;pfx=0&amp;fu=8328&amp;bc=31&amp;ifi=1&amp;uci=a!1&amp;fsb=1&amp;xpc=YY4MvanGdV&amp;p=https%3A//www.itdaan.com&amp;dtd=1214" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" data-google-container-id="a!1" data-google-query-id="CPXekMTa2ewCFfJLFQgdB80B4w" data-load-complete="true"></iframe></ins></ins></ins>
-        <script>
-            (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-
-    </div>
-    <div class="media-body" id="content_div">
+    <h1 id="hashmap-和-concurrenthashmap-实现原理">HashMap 和 ConcurrentHashMap 实现原理</h1>
+    <p>哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表，而HashMap的实现原理也常常出现在各类的面试题中，重要性可见一斑。</p>
+    <h3 id="什么是哈希表">什么是哈希表</h3>
+    <p>在讨论哈希表之前，我们先大概了解下其他数据结构在新增，查找等基础操作执行性能</p>
+    <p><strong>数组</strong>：采用一段连续的存储单元来存储数据。对于指定下标的查找，时间复杂度为O(1)；通过给定值进行查找，需要遍历数组，逐一比对给定关键字和数组元素，时间复杂度为O(n)，当然，对于有序数组，则可采用二分查找，插值查找，斐波那契查找等方式，可将查找复杂度提高为O(logn)；对于一般的插入删除操作，涉及到数组元素的移动，其平均复杂度也为O(n)</p>
+    <p><strong>线性链表</strong>：对于链表的新增，删除等操作（在找到指定操作位置后），仅需处理结点间的引用即可，时间复杂度为O(1)，而查找操作需要遍历链表逐一进行比对，复杂度为O(n)</p>
+    <p><strong>二叉树</strong>：对一棵相对平衡的有序二叉树，对其进行插入，查找，删除等操作，平均复杂度均为O(logn)。</p>
+    <p><strong>哈希表</strong>：相比上述几种数据结构，在哈希表中进行添加，删除，查找等操作，性能十分之高，不考虑哈希冲突的情况下，仅需一次定位即可完成，时间复杂度为O(1)，接下来我们就来看看哈希表是如何实现达到惊艳的常数阶O(1)的。</p>
+    <p>我们知道，数据结构的物理存储结构只有两种：<strong>顺序存储结构</strong>和<strong>链式存储结构</strong>（像栈，队列，树，图等是从逻辑结构去抽象的，映射到内存中，也这两种物理组织形式），而在上面我们提到过，在数组中根据下标查找某个元素，一次定位就可以达到，哈希表利用了这种特性，<strong>哈希表的主干就是数组</strong>。</p>
+    <p>比如我们要新增或查找某个元素，我们通过把当前元素的关键字 通过某个函数映射到数组中的某个位置，通过数组下标一次定位就可完成操作。</p>
+    <pre><code>存储位置 = f(关键字)
+</code></pre><p>其中，这个函数f一般称为<strong>哈希函数</strong>，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：</p>
+    <p><img src="../assets/2019-03/HashTable.png" alt=""></p>
+    <p>查找操作同理，先通过哈希函数计算出实际存储地址，然后从数组中对应地址取出即可。</p>
+    <h3 id="哈希冲突">哈希冲突</h3>
+    <p>当我们对某个元素进行哈希运算，得到一个存储地址，然后要进行插入的时候，发现已经被其他元素占用了，其实这就是所谓的哈希冲突，也叫哈希碰撞。前面我们提到过，哈希函数的设计至关重要，好的哈希函数会尽可能地保证 计算简单和散列地址分布均匀,但是，我们需要清楚的是，数组是一块连续的固定长度的内存空间，再好的哈希函数也不能保证得到的存储地址绝对不发生冲突。那么哈希冲突如何解决呢？哈希冲突的解决方案有多种:<strong>开放定址法</strong>（发生冲突，继续寻找下一块未被占用的存储地址），<strong>链地址法</strong>，而HashMap即是采用了链地址法，也就是数组+链表的方式。</p>
+    <h3 id="java7-hashmap">Java7 HashMap</h3>
+    <p>HashMap的主干是一个Entry数组。Entry是HashMap的基本组成单元，每一个Entry包含一个key-value键值对。</p>
+    <p><img src="../assets/2019-03/hashmap1.png" alt=""></p>
+    <p>简单来说，<strong>HashMap由数组+链表组成的</strong>，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的，如果定位到的数组位置不含链表（当前entry的next指向null）,那么对于查找，添加等操作很快，仅需一次寻址即可；如果定位到的数组包含链表，对于添加操作，其时间复杂度为O(n)，首先遍历链表，存在即覆盖，否则新增；对于查找操作来讲，仍需遍历链表，然后通过key对象的equals方法逐一比对查找。所以，性能考虑，<strong>HashMap中的链表出现越少，性能才会越好</strong>。</p>
+    <p>当发生哈希冲突并且size大于阈值的时候，需要进行数组扩容，扩容时，需要新建一个长度为之前数组2倍的新的数组，然后将当前的Entry数组中的元素全部传输过去，扩容后的新数组长度为之前的2倍，所以扩容相对来说是个耗资源的操作。</p>
+    <p><strong>构造HashMap的时候，默认数组长度16，所以最大下标为15，（二进制表示1111）。在进行与运算的时候结果分布更加均匀，减少了Hash冲突。在进行数组扩容的时候也应该选择2的倍数。</strong></p>
+    <h3 id="java8-hashmap">Java8 HashMap</h3>
+    <p><img src="../assets/2019-03/hashmap2.png" alt=""></p>
+    <p>Java7中使用Entry来代表每个HashMap中的数据节点，Java8中使用 Node，基本没有区别，都是key，value，hash和next这四个属性，不过，Node只能用于链表的情况，红黑树的情况需要使用TreeNode。</p>
+    <p>我们根据数组元素中，第一个节点数据类型是 Node 还是 TreeNode 来判断该位置下是链表还是红黑树的。</p>
+    <h3 id="java7-concurrenthashmap">Java7 ConcurrentHashMap</h3>
+    <p>ConcurrentHashMap和HashMap思路是差不多的，但是因为它支持并发操作，所以要复杂一些。</p>
+    <p><img src="../assets/2019-03/ConcurrentHashMap1.png" alt=""></p>
+    <p>整个ConcurrentHashMap由一个个Segment组成，Segment代表”部分“或”一段“的意思，所以很多地方都会将其描述为分段锁。</p>
+    <p>简单理解就是，<strong>ConcurrentHashMap是一个Segment数组，Segment通过继承ReentrantLock来进行加锁</strong>，所以每次需要加锁的操作锁住的是一个segment，这样只要保证每个Segment是线程安全的，也就实现了全局的线程安全。</p>
+    <p><strong>ConcurrentHashMap有16个Segments，所以理论上，这个时候，最多可以同时支持16个线程并发写，只要它们的操作分别分布在不同的Segment上。这个值可以在初始化的时候设置为其他值，但是一旦初始化以后，它是不可以扩容的。</strong></p>
+    <h3 id="java8-concurrenthashmap">Java8 ConcurrentHashMap</h3>
+    <p><img src="../assets/2019-03/ConcurrentHashMap2.png" alt=""></p>
+    <p>改进一：取消segments字段，直接采用transient volatile HashEntry<k,v>[] table保存数据，采用table数组元素作为锁，从而实现了对每一行数据进行加锁，进一步减少并发冲突的概率。</k,v></p>
+    <p>改进二：将原先table数组＋单向链表的数据结构，变更为table数组＋单向链表＋红黑树的结构。对于hash表来说，最核心的能力在于将key hash之后能均匀的分布在数组中。如果hash之后散列的很均匀，那么table数组中的每个队列长度主要为0或者1。但实际情况并非总是如此理想，虽然ConcurrentHashMap类默认的加载因子为0.75，但是在数据量过大或者运气不佳的情况下，还是会存在一些队列长度过长的情况，如果还是采用单向列表方式，那么查询某个节点的时间复杂度为O(n)；因此，对于个数超过8(默认值)的列表，jdk1.8中采用了红黑树的结构，那么查询的时间复杂度可以降低到O(logN)，可以改进性能。</p>
 
 
-        <h2>第一次握手</h2>
-        <p>客户端调用connect，向服务端发送连接请求报文。该报文是一个特殊报文，报文首部同步位SYN=1，同时确认位ACK=0，seq=x表示确认字段的值为x,该字段值由客户端选择，表示客户端向服务端发送数据的第一个字节编号为x+1。连接报文发送后，客户端的TCP连接状态由CLOSED转为SYN_SENT。</p>
-        <p>服务端调用accept，从lisent的连接请求队列中取出一个连接请求，并为之创建套接字和分配资源，开始建立连接。服务端的TCP连接状态由LISENT转为SYN_RCVD。</p>
-        <p><a href="https://www.itdaan.com/link/aHR0cDovL2ltYWdlczIwMTUuY25ibG9ncy5jb20vYmxvZy85MjI1MjEvMjAxNjA0LzkyMjUyMS0yMDE2MDQwMzIyMTYzNzg3OS0xODk2MjI3Nzg1LnBuZw==" rel="nofollow noopener" target="_blank"><img title="QQ截图2" style="border-top: 0px; border-right: 0px; background-image: none; border-bottom: 0px; padding-top: 0px; padding-left: 0px; border-left: 0px; display: inline; padding-right: 0px" border="0" alt="QQ截图2" src="https://www.itdaan.com/go/aHR0cHM6Ly9pbWFnZXMyMDE1LmNuYmxvZ3MuY29tL2Jsb2cvOTIyNTIxLzIwMTYwNC85MjI1MjEtMjAxNjA0MDMyMjE2Mzk4MzItMTY2MDA0NTAxNy5wbmc=" width="536" height="578" referrerpolicy="no-referrer"></a></p>
-        <h2>第二次握手</h2>
-        <p>服务端为连接分配资源，同意连接，向客户端发送SYN=1的确认报文。ACK=1表示确认号字段ack的值有效，ack=x+1表示希望收到第一个字节编号为x+1的若干数据，seq=y表示服务端向客户端发送数据的起始字节编号为y+1。客户端收到确认，TCP连接状态由SYN_SENT转为ESTABLISHED。</p>
-        <ins class="adsbygoogle" style="display: block; text-align: center; height: 0px;" data-ad-layout="in-article" data-ad-format="fluid" data-ad-client="ca-pub-4353345653789615" data-ad-slot="8840342077" data-adsbygoogle-status="done"><ins id="aswift_2_expand" style="display: inline-table; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent;"><ins id="aswift_2_anchor" style="display: block; border: none; height: 0px; margin: 0px; padding: 0px; position: relative; visibility: visible; width: 758px; background-color: transparent; overflow: hidden; transition: opacity 1s cubic-bezier(0.4, 0, 1, 1) 0s, width 0.2s cubic-bezier(0.4, 0, 1, 1) 0.3s, height 0.5s cubic-bezier(0.4, 0, 1, 1) 0s; opacity: 0;"><iframe id="aswift_2" name="aswift_2" style="left:0;position:absolute;top:0;border:0;width:758px;height:190px;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="758" height="190" frameborder="0" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-4353345653789615&amp;output=html&amp;h=190&amp;slotname=8840342077&amp;adk=3697260208&amp;adf=3964066570&amp;pi=t.ma~as.8840342077&amp;w=758&amp;fwrn=4&amp;lmt=1603971246&amp;rafmt=11&amp;psa=1&amp;guci=2.2.0.0.2.2.0.0&amp;format=758x190&amp;url=https%3A%2F%2Fwww.itdaan.com%2Fblog%2F2016%2F04%2F03%2F730973.html&amp;flash=0&amp;wgl=1&amp;uach=WyJXaW5kb3dzIiwiMTAuMCIsIng4NiIsIiIsIjg2LjAuNDI0MC4xMTEiLFtdXQ..&amp;dt=1603971245537&amp;bpp=31&amp;bdt=2527&amp;idt=1381&amp;shv=r20201026&amp;cbv=r20190131&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Da66fbb80511ede41%3AT%3D1602233265%3AS%3DALNI_MZ73Uwmxlqb4DFqudgmjmWVvF10xQ&amp;prev_fmts=0x0%2C758x280&amp;nras=1&amp;correlator=8692668694627&amp;frm=20&amp;pv=1&amp;ga_vid=121663445.1602233266&amp;ga_sid=1603971246&amp;ga_hid=1741598035&amp;ga_fc=0&amp;iag=0&amp;icsg=42081276&amp;dssz=23&amp;mdo=0&amp;mso=8&amp;rplot=4&amp;u_tz=480&amp;u_his=1&amp;u_java=0&amp;u_h=1080&amp;u_w=1920&amp;u_ah=1040&amp;u_aw=1920&amp;u_cd=24&amp;u_nplug=3&amp;u_nmime=4&amp;adx=373&amp;ady=1406&amp;biw=1903&amp;bih=937&amp;scr_x=0&amp;scr_y=0&amp;eid=21067467%2C21068084%2C21067494&amp;oid=3&amp;pvsid=4225567025507134&amp;pem=356&amp;rx=0&amp;eae=0&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C1040%2C1920%2C937&amp;vis=1&amp;rsz=%7C%7CoeEbr%7C&amp;abl=CS&amp;pfx=0&amp;fu=8328&amp;bc=31&amp;ifi=2&amp;uci=a!2&amp;btvi=1&amp;fsb=1&amp;xpc=kSxf7Z4d2P&amp;p=https%3A//www.itdaan.com&amp;dtd=1474" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" data-google-container-id="a!2" data-google-query-id="CKa7tcTa2ewCFcSqcQodSiUCmQ" data-load-complete="true"></iframe></ins></ins></ins>
-        <script>     (adsbygoogle = window.adsbygoogle || []).push({});</script>
-        <h2>第三次握手</h2>
-        <p>客户端TCP连接状态转为ESTABLISHED，立即向服务器发送确认报文，connect函数返回，连接建立成功。</p>
-        <p>服务端收到客户端的确认报文，TCP连接状态由SYN_RCVD转为ESTABLISHED，accept函数返回。</p>
-        <p>至此一个连接的三次握手结束，连接建立，客户端可以和服务端进行可靠通信。</p>
-
-
-    </div>
-    <!-- <img alt="关注微信公众号" src="https://www.itdaan.com/img/weixin_public_white.jpg" width="100%">-->
-
-    <ins class="adsbygoogle" style="display: block; height: 454px;" data-ad-format="autorelaxed" data-ad-client="ca-pub-4353345653789615" data-ad-slot="5874745610" data-adsbygoogle-status="done"><ins id="aswift_3_expand" style="display:inline-table;border:none;height:454px;margin:0;padding:0;position:relative;visibility:visible;width:758px;background-color:transparent;"><ins id="aswift_3_anchor" style="display:block;border:none;height:454px;margin:0;padding:0;position:relative;visibility:visible;width:758px;background-color:transparent;"><iframe id="aswift_3" name="aswift_3" style="left:0;position:absolute;top:0;border:0;width:758px;height:454px;" sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts allow-top-navigation-by-user-activation" width="758" height="454" frameborder="0" src="https://googleads.g.doubleclick.net/pagead/ads?client=ca-pub-4353345653789615&amp;output=html&amp;h=454&amp;slotname=5874745610&amp;adk=2661829903&amp;adf=2555147040&amp;pi=t.ma~as.5874745610&amp;w=758&amp;cr_col=4&amp;cr_row=2&amp;fwrn=2&amp;lmt=1603971247&amp;rafmt=9&amp;psa=1&amp;guci=2.2.0.0.2.2.0.0&amp;format=758x454&amp;url=https%3A%2F%2Fwww.itdaan.com%2Fblog%2F2016%2F04%2F03%2F730973.html&amp;flash=0&amp;crui=image_stacked&amp;fwr=0&amp;wgl=1&amp;uach=WyJXaW5kb3dzIiwiMTAuMCIsIng4NiIsIiIsIjg2LjAuNDI0MC4xMTEiLFtdXQ..&amp;dt=1603971245569&amp;bpp=7&amp;bdt=2559&amp;idt=1579&amp;shv=r20201026&amp;cbv=r20190131&amp;ptt=9&amp;saldr=aa&amp;abxe=1&amp;cookie=ID%3Da66fbb80511ede41-2201479d6ac40008%3AT%3D1603971248%3ART%3D1603971248%3AS%3DALNI_MYwYlMG_S4VpyKSoXP2DaGFN2DG3A&amp;prev_fmts=0x0%2C758x280%2C758x190&amp;nras=1&amp;correlator=8692668694627&amp;frm=20&amp;pv=1&amp;ga_vid=121663445.1602233266&amp;ga_sid=1603971246&amp;ga_hid=1741598035&amp;ga_fc=0&amp;iag=0&amp;icsg=42081276&amp;dssz=23&amp;mdo=0&amp;mso=8&amp;u_tz=480&amp;u_his=1&amp;u_java=0&amp;u_h=1080&amp;u_w=1920&amp;u_ah=1040&amp;u_aw=1920&amp;u_cd=24&amp;u_nplug=3&amp;u_nmime=4&amp;adx=373&amp;ady=1746&amp;biw=1903&amp;bih=937&amp;scr_x=0&amp;scr_y=0&amp;eid=21067467%2C21068084%2C21067494&amp;oid=3&amp;pvsid=4225567025507134&amp;pem=356&amp;rx=0&amp;eae=0&amp;fc=1920&amp;brdim=0%2C0%2C0%2C0%2C1920%2C0%2C1920%2C1040%2C1920%2C937&amp;vis=1&amp;rsz=%7C%7CoeEbr%7C&amp;abl=CS&amp;pfx=0&amp;fu=8328&amp;bc=31&amp;ifi=3&amp;uci=a!3&amp;btvi=2&amp;fsb=1&amp;xpc=fDdbQDpejh&amp;p=https%3A//www.itdaan.com&amp;dtd=1597" marginwidth="0" marginheight="0" vspace="0" hspace="0" allowtransparency="true" scrolling="no" allowfullscreen="true" data-google-container-id="a!3" data-google-query-id="CLPot8Ta2ewCFdPA5godix4BWQ" data-load-complete="true"></iframe></ins></ins></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-</div>
+</section>
