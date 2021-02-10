@@ -1,41 +1,253 @@
-<section class="normal markdown-section">
-
-    <h1 id="hashmap-和-concurrenthashmap-实现原理">HashMap 和 ConcurrentHashMap 实现原理</h1>
-    <p>哈希表（hash table）也叫散列表，是一种非常重要的数据结构，应用场景及其丰富，许多缓存技术（比如memcached）的核心其实就是在内存中维护一张大的哈希表，而HashMap的实现原理也常常出现在各类的面试题中，重要性可见一斑。</p>
-    <h3 id="什么是哈希表">什么是哈希表</h3>
-    <p>在讨论哈希表之前，我们先大概了解下其他数据结构在新增，查找等基础操作执行性能</p>
-    <p><strong>数组</strong>：采用一段连续的存储单元来存储数据。对于指定下标的查找，时间复杂度为O(1)；通过给定值进行查找，需要遍历数组，逐一比对给定关键字和数组元素，时间复杂度为O(n)，当然，对于有序数组，则可采用二分查找，插值查找，斐波那契查找等方式，可将查找复杂度提高为O(logn)；对于一般的插入删除操作，涉及到数组元素的移动，其平均复杂度也为O(n)</p>
-    <p><strong>线性链表</strong>：对于链表的新增，删除等操作（在找到指定操作位置后），仅需处理结点间的引用即可，时间复杂度为O(1)，而查找操作需要遍历链表逐一进行比对，复杂度为O(n)</p>
-    <p><strong>二叉树</strong>：对一棵相对平衡的有序二叉树，对其进行插入，查找，删除等操作，平均复杂度均为O(logn)。</p>
-    <p><strong>哈希表</strong>：相比上述几种数据结构，在哈希表中进行添加，删除，查找等操作，性能十分之高，不考虑哈希冲突的情况下，仅需一次定位即可完成，时间复杂度为O(1)，接下来我们就来看看哈希表是如何实现达到惊艳的常数阶O(1)的。</p>
-    <p>我们知道，数据结构的物理存储结构只有两种：<strong>顺序存储结构</strong>和<strong>链式存储结构</strong>（像栈，队列，树，图等是从逻辑结构去抽象的，映射到内存中，也这两种物理组织形式），而在上面我们提到过，在数组中根据下标查找某个元素，一次定位就可以达到，哈希表利用了这种特性，<strong>哈希表的主干就是数组</strong>。</p>
-    <p>比如我们要新增或查找某个元素，我们通过把当前元素的关键字 通过某个函数映射到数组中的某个位置，通过数组下标一次定位就可完成操作。</p>
-    <pre><code>存储位置 = f(关键字)
-</code></pre><p>其中，这个函数f一般称为<strong>哈希函数</strong>，这个函数的设计好坏会直接影响到哈希表的优劣。举个例子，比如我们要在哈希表中执行插入操作：</p>
-    <p><img src="../assets/2019-03/HashTable.png" alt=""></p>
-    <p>查找操作同理，先通过哈希函数计算出实际存储地址，然后从数组中对应地址取出即可。</p>
-    <h3 id="哈希冲突">哈希冲突</h3>
-    <p>当我们对某个元素进行哈希运算，得到一个存储地址，然后要进行插入的时候，发现已经被其他元素占用了，其实这就是所谓的哈希冲突，也叫哈希碰撞。前面我们提到过，哈希函数的设计至关重要，好的哈希函数会尽可能地保证 计算简单和散列地址分布均匀,但是，我们需要清楚的是，数组是一块连续的固定长度的内存空间，再好的哈希函数也不能保证得到的存储地址绝对不发生冲突。那么哈希冲突如何解决呢？哈希冲突的解决方案有多种:<strong>开放定址法</strong>（发生冲突，继续寻找下一块未被占用的存储地址），<strong>链地址法</strong>，而HashMap即是采用了链地址法，也就是数组+链表的方式。</p>
-    <h3 id="java7-hashmap">Java7 HashMap</h3>
-    <p>HashMap的主干是一个Entry数组。Entry是HashMap的基本组成单元，每一个Entry包含一个key-value键值对。</p>
-    <p><img src="../assets/2019-03/hashmap1.png" alt=""></p>
-    <p>简单来说，<strong>HashMap由数组+链表组成的</strong>，数组是HashMap的主体，链表则是主要为了解决哈希冲突而存在的，如果定位到的数组位置不含链表（当前entry的next指向null）,那么对于查找，添加等操作很快，仅需一次寻址即可；如果定位到的数组包含链表，对于添加操作，其时间复杂度为O(n)，首先遍历链表，存在即覆盖，否则新增；对于查找操作来讲，仍需遍历链表，然后通过key对象的equals方法逐一比对查找。所以，性能考虑，<strong>HashMap中的链表出现越少，性能才会越好</strong>。</p>
-    <p>当发生哈希冲突并且size大于阈值的时候，需要进行数组扩容，扩容时，需要新建一个长度为之前数组2倍的新的数组，然后将当前的Entry数组中的元素全部传输过去，扩容后的新数组长度为之前的2倍，所以扩容相对来说是个耗资源的操作。</p>
-    <p><strong>构造HashMap的时候，默认数组长度16，所以最大下标为15，（二进制表示1111）。在进行与运算的时候结果分布更加均匀，减少了Hash冲突。在进行数组扩容的时候也应该选择2的倍数。</strong></p>
-    <h3 id="java8-hashmap">Java8 HashMap</h3>
-    <p><img src="../assets/2019-03/hashmap2.png" alt=""></p>
-    <p>Java7中使用Entry来代表每个HashMap中的数据节点，Java8中使用 Node，基本没有区别，都是key，value，hash和next这四个属性，不过，Node只能用于链表的情况，红黑树的情况需要使用TreeNode。</p>
-    <p>我们根据数组元素中，第一个节点数据类型是 Node 还是 TreeNode 来判断该位置下是链表还是红黑树的。</p>
-    <h3 id="java7-concurrenthashmap">Java7 ConcurrentHashMap</h3>
-    <p>ConcurrentHashMap和HashMap思路是差不多的，但是因为它支持并发操作，所以要复杂一些。</p>
-    <p><img src="../assets/2019-03/ConcurrentHashMap1.png" alt=""></p>
-    <p>整个ConcurrentHashMap由一个个Segment组成，Segment代表”部分“或”一段“的意思，所以很多地方都会将其描述为分段锁。</p>
-    <p>简单理解就是，<strong>ConcurrentHashMap是一个Segment数组，Segment通过继承ReentrantLock来进行加锁</strong>，所以每次需要加锁的操作锁住的是一个segment，这样只要保证每个Segment是线程安全的，也就实现了全局的线程安全。</p>
-    <p><strong>ConcurrentHashMap有16个Segments，所以理论上，这个时候，最多可以同时支持16个线程并发写，只要它们的操作分别分布在不同的Segment上。这个值可以在初始化的时候设置为其他值，但是一旦初始化以后，它是不可以扩容的。</strong></p>
-    <h3 id="java8-concurrenthashmap">Java8 ConcurrentHashMap</h3>
-    <p><img src="../assets/2019-03/ConcurrentHashMap2.png" alt=""></p>
-    <p>改进一：取消segments字段，直接采用transient volatile HashEntry<k,v>[] table保存数据，采用table数组元素作为锁，从而实现了对每一行数据进行加锁，进一步减少并发冲突的概率。</k,v></p>
-    <p>改进二：将原先table数组＋单向链表的数据结构，变更为table数组＋单向链表＋红黑树的结构。对于hash表来说，最核心的能力在于将key hash之后能均匀的分布在数组中。如果hash之后散列的很均匀，那么table数组中的每个队列长度主要为0或者1。但实际情况并非总是如此理想，虽然ConcurrentHashMap类默认的加载因子为0.75，但是在数据量过大或者运气不佳的情况下，还是会存在一些队列长度过长的情况，如果还是采用单向列表方式，那么查询某个节点的时间复杂度为O(n)；因此，对于个数超过8(默认值)的列表，jdk1.8中采用了红黑树的结构，那么查询的时间复杂度可以降低到O(logN)，可以改进性能。</p>
+<div class="cloud-blog-detail-left" style="float:left;display:inline-block">
 
 
-</section>
+    <!-- 页签PC&mb start -->
+    <div class="cloud-blog-detail-crumbs pc_current">
+        <a href="https://bbs.huaweicloud.com" target="_blank" rel="noopener noreferrer">云社区</a>
+        <a href="https://bbs.huaweicloud.com/blogs" target="_blank" rel="noopener noreferrer">博客</a>
+        <span class="current">博客详情</span>
+    </div>
+    <!-- 页签PC&mb end -->
+
+    <!-- 博客标题 -->
+    <h1 class="cloud-blog-detail-title">mysql 双1设置</h1>
+
+    <!-- 博主博客信息PC&mb start -->
+    <div class="common-blog-icons  common-blog-icons-cloud-blog">
+
+        <i class="icon-v-mb-S"></i>
+
+
+
+
+        <div class="m-author-min-head pc_current ">
+            <a href="/community/usersnew/id_1585800252205566" class="author-min-head" target="_blank" rel="noopener noreferrer">
+
+                <img id="headImg" class="authorImg currentImg" path="1595473563384_1925_4872.png" src="https://bbs-img.huaweicloud.com/user/img/head/1595473563384_1925_4872.png">
+
+            </a>
+            <span>
+            <i class="bufer">
+                <a class="sub-content-username " href="/community/usersnew/id_1585800252205566" target="_blank" rel="noopener noreferrer">snowofsummer</a>
+            </i>
+        </span>
+            <span class="article-write-time"> 发表于 2021-02-04 09:24:40</span>
+            <span class="phone-article-write-time">2021-02-04</span>
+        </div>
+
+        <div class="m-blog-view-info">
+            <div class="common-blog-eye new-blogs-icon"></div>
+            <span id="viewNum" data-count="">9</span>
+
+            <div class="common-blog-bubbling new-blogs-icon"></div>
+            <span class="commentTotalCounts" data-count="0">0</span>
+
+            <div class="common-blog-praise new-blogs-icon"></div>
+            <span data-count="0">0</span>
+
+        </div>
+
+        <div id="edit_delete"></div>
+
+    </div>
+    <!-- 博主博客信息PC&mb end -->
+
+    <!-- 博客标签 start -->
+    <div class="blog-menu-footer m-blog-menu-footer-top">
+
+        <a class="common-blog-menu-btn" target="_blank" rel="noopener noreferrer" mate_data_ts="bbs_blogdetail_blogTag.click.toptag_MySQL_Blog" title="MySQL" href="https://developer.huaweicloud.com/tags/200464/blog_1">MySQL</a>
+
+    </div>
+    <!-- 博客标签 end -->
+
+    <hr class="cloud-blog-detail-line">
+
+    <!-- 博客摘要 start -->
+    <div class="cloud-blog-detail-summary">
+        <div class="cloud-blog-detail-summary-tag">【摘要】 双1设置：（适合数据安全性要求非常高，而且磁盘IO写能力足够支持业务(磁盘为 PCIE SSD)）sync_binlog、innodb_flush_log_at_trx_commit 这两个参数都要设置为1。// mysqld 服务崩溃或者服务器主机 crash 的情况下，binary log 只有可能丢失最多一个语句或者一个事务。sync_binlog该参数表示事务写入 binary lo...</div>
+    </div>
+    <!-- 博客摘要 end -->
+
+    <!-- 博客正文内容 start -->
+    <div class="cloud-blog-detail-content-wrap slidedown">
+        <div class="cloud-blog-detail-content blog-content-block-0" id="blogContent">
+            <p>双1设置：（<span style="color: #4d4d4d;">适合数据安全性要求非常高，而且磁盘IO写能力足够支持业务(磁盘为 PCIE SSD)</span>）</p>
+            <p><span style="color: #4d4d4d;"> sync_binlog、innodb_flush_log_at_trx_commit 这两个参数都要设置为1。</span></p>
+            <p><span style="color: #4d4d4d;"><span>// mysqld 服务崩溃或者服务器主机 crash 的情况下，binary log 只有可能丢失最多一个语句或者一个事务。</span></span></p>
+            <h1 style="color: #4f4f4f;">sync_binlog</h1>
+            <p>该参数表示事务写入 binary log 并使用 fdatasync() 函数同步到磁盘的过程。<br>取值为0：mysql 自己不主动同步，依赖操作系统本身不定期把文件内容刷新到磁盘。性能最佳</p>
+            <p>取值为1：每次事务提交后将 binlog_cache 中的数据强制写入磁盘 bin log日志中，是最慢的，但是最安全</p>
+            <p>取值 &gt;1：当进行n次事务提交后，mysql 将 binlog_cache 中的数据强制写入磁盘中。</p>
+            <h1 style="color: #4f4f4f;">innodb_flush_log_at_trx_commit</h1>
+            <p style="color: #4d4d4d;">该参数表示 log buffer 写入 log file 以及刷新到磁盘的过程。<br>取值为0：log buffer 每秒写入日志文件 log file 并刷新 flush 到磁盘。这种情况下，mysql 的日志刷写操作和事务提交操作没有关系。因此 mysql 的性能是最好的时刻。不过不安全</p>
+            <p style="color: #4d4d4d;">取值为1：每次事务提交时，log buffer 会被写入到日志文件并且还要刷写到磁盘上。由于每次事务都要提交到I/O设备，因此会慢一点，不过是最安全的。</p>
+            <p style="color: #4d4d4d;">取值为2：0和1的中间效果，即每次的事务提交会写入 log buffer，而刷写到磁盘则是一秒进行一次。性能属于一般。</p>
+            <p><img class="mce_image" id="images_16124018733549" src="https://bbs-img.huaweicloud.com/blogs/img/1612401876569015643.png"></p>
+            <p><span style="color: #4d4d4d;"></span></p>
+            <p><span style="color: #4d4d4d;"></span></p>
+        </div>
+
+
+        <p class="pc_current ask-tip" style="display: none;">登录后可下载附件，请<a href="https://auth.huaweicloud.com/authui/login?service=https://bbs.huaweicloud.com/blogs/241457#attachment&amp;locale=zh-cn">登录</a>或者<a href="https://reg.huaweicloud.com/registerui/public/custom/register.html?locale=zh-cn&amp;service=https://bbs.huaweicloud.com#/register">注册</a></p>
+
+        <!-- 版权声明 start -->
+
+        <div class="cloud-blog-detail-copyrights" style="clear: both;">【版权声明】本文为华为云社区用户原创内容，转载时必须标注文章的来源（华为云社区），文章链接，文章作者等基本信息，否则作者和本社区有权追究责任。如果您发现本社区中有涉嫌抄袭的内容，欢迎发送邮件至：<a class="mail-contact-address" href="mailto:huaweicloud.bbs@huawei.com">huaweicloud.bbs@huawei.com</a>进行举报，并提供相关证据，一经查实，本社区将立刻删除涉嫌侵权内容。</div>
+
+        <!-- 版权声明 end -->
+
+        <div class="blog-menu-footer m-blog-menu-footer-bottom">
+
+            <a class="common-blog-menu-btn title_banner_7" target="_self" rel="noopener noreferrer" mate_data_ts="bbs_blogdetail_blogTag.click.MySQL_Blog" title="MySQL" href="https://developer.huaweicloud.com/tags/200464/blog_1">MySQL</a>
+
+        </div>
+    </div>
+    <!-- 博客正文内容 end -->
+
+    <div class="blog-detail-content-btn" style="display: none;">
+        <a href="javascript:void(0)">展开全部内容</a>
+        <span class="arrowdown"></span>
+    </div>
+
+
+    <div class="cloud-blog-detail-comment-like-btn">
+
+        <a class="cloud-blog-detail-comment-btn" href="#comment-textarea" rel="nofollow">评论文章</a>
+
+        //点赞 收藏
+        <a id="isVote" class="click-vote cloud-blog-praise-btn " mate_data_ts="bbs_blogdetail_like.click.mysql 双1设置"><i class="praise-icon new-blogs-icon voteAddBtn praise-toggle"></i><span id="voteNum" class="">0</span><div class="blog-tips cloud-blog-praise-tips">点赞</div></a>
+        <a id="isLike" class="cloud-blog-detail-like-btn " mate_data_ts="bbs_blogdetail_collect.click.mysql 双1设置"><i class="like-icon new-blogs-icon like-toggle"></i><span id="likeNum" class="">0</span><div class="blog-tips cloud-blog-like-tips">收藏</div></a>
+
+        <div class="hover-box" style="position:relative;">
+            <a class="cloud-blog-detail-link fr" mate_data_ts="bbs_blogDetail_share.click.link_mysql 双1设置" href="javascript:void(0);">
+                <i class="link-icon new-blogs-icon"></i>
+            </a>
+            <div class="cloud-blog-detail-link-hover">
+                <div class="cloud-blog-detail-link-click-text"><i class="copy-link-success new-blogs-icon"></i>链接复制成功</div>
+                <div class="cloud-blog-detail-link-hover-text">复制链接到剪贴板</div>
+            </div>
+            <a class="cloud-blog-detail-microBlog fr" mate_data_ts="bbs_blogDetail_share.click.weibo_mysql 双1设置" href="http://service.weibo.com/share/share.php?title=mysql 双1设置&nbsp;mysql 双1设置双1设置：（适合数据安全性要求非常高，而且磁盘IO写能力足够支持业务(磁盘为 PCIE SSD)）sync_binlog、innodb_flush_log_at_trx_commit 这两个参数都要设置为1。// mysqld 服务崩溃或者服务器主机 crash 的情况下，binary log 只有可能丢失最多一个语句或者一个事务。sync_binlog该参数表示事务写入 binary lo...&amp;url=https://bbs.huaweicloud.com/blog/241457" target="_blank" rel="noopener noreferrer">
+                <i class="microBlog-icon new-blogs-icon"></i>
+            </a>
+            <div class="cloud-blog-detail-microBlog-hover">
+                <div class="cloud-blog-detail-microBlog-hover-text">分享文章到微博</div>
+            </div>
+            <a class="cloud-blog-detail-weChat fr">
+                <i class="weChat-icon new-blogs-icon"></i>
+            </a>
+            <div class="cloud-blog-detail-weChat-hover">
+                <div class="cloud-blog-detail-weChat-hover-text">分享文章到朋友圈</div>
+                <div class="cloud-blog-detail-weChat-hover-code" id="qrwechat">
+                    <canvas width="100" height="100"></canvas></div>
+            </div>
+            <a class="cloud-blog-detail-share fr">
+                <i class="share-icon new-blogs-icon"></i>
+                <span class="cloud-blog-detail-share-text">分享</span>
+            </a>
+        </div>
+    </div>
+
+
+
+    <!-- begin 上一篇 下一篇 -->
+
+    <div id="preNextArticle" class="cloud-blog-detail-pre-next-article cloud-blog-detail-relation-article">
+
+        <p>
+            <a id="blog_prev_title" title="move datafile online" href="/blogs/240591" class="cloud-blog-detail-pre-article">
+                <span>上一篇：move datafile online</span>
+            </a>
+        </p>
+
+
+        <p>
+            <a id="blog_next_title" title="mysql 查看执行计划" href="/blogs/241461" class="cloud-blog-detail-pre-article">
+                <span>下一篇：mysql 查看执行计划</span>
+            </a>
+        </p>
+
+    </div>
+
+    <!-- end 上一篇 下一篇 -->
+
+    <!-- 移动端begin 相关文章 -->
+    <h3 id="relateAritcleTitle" class="cloud-blog-detail-section-title" hidden="">相关文章</h3>
+    <div id="relateAritcleDom" class="cloud-blog-detail-relation-article" hidden=""></div>
+
+    <!-- end 相关文章 -->
+
+    <!-- 评论tpl -->
+
+    <div class="comment-block">
+
+
+
+        <h3 class="cloud-blog-detail-section-title" id="comment" data-delete-localpage-num="0">评论 <span style="display:inline-block;">(</span><span id="commentTotalCount" class="commentTotalCount" style="display:inline-block;">0</span><span style="display:inline-block">)</span></h3>
+        <hr class="cloud-blog-detail-line">
+
+        <!--用户登录评论状态 start-->
+
+        <div class="cloud-blog-detail-comment-section">
+
+            <div id="comment-level-one">
+                <!--一级评论 start-->
+
+
+                <div class="blog-a879df4ea9dc4768ade6529ef3d6cc08" data-levelone-total="0" data-del-total="0">
+
+                </div>
+
+                <div id="comment-textarea"></div>
+
+
+            </div>
+
+            <!--博客评论编辑区 start-->
+            <div id="comment-edit">
+                <div class="comment-edit" style="margin-top:15px; clear:both; " hidden="">
+                    <div class="detail-commenter-reply-comment">
+                        <textarea style="height: 32px;" data-btns-wrap="btns-wrap-edit" data-height="84" data-real-height="80" data-textarea="textarea-edit" class="textarea-edit textarea-comment" id="textarea-comment-edit" placeholder="请输入评论"></textarea>
+                        <div class="length-block"><span class="length-textarea-xx "><span class="statistics">0</span>/1000</span><div></div></div>
+                        <div class="btns-wrap-edit">
+                            <a data-comment-id="comment-xx" data-textarea="textarea-edit" data-btns-wrap="btns-wrap-edit" class="comment-section-comment-btn comment-section-cancel-btn comment-edit-reset">取消</a>
+                            <a data-comment-id="comment-xx" data-textarea="textarea-edit" class="comment-section-comment-btn comment-edit-submit">更新评论</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="pc_current">
+
+                <!--如果允许评论/博客评论区 start -->
+                <div class="my-talking" hidden="" style="display: block;">
+                    <textarea style="height: 80px; width:100%;" data-height="84" data-real-height="80" data-textarea="textarea-a879df4ea9dc4768ade6529ef3d6cc08" class="textarea-a879df4ea9dc4768ade6529ef3d6cc08 textarea-comment comment-section-input" id="textarea-comment-blog" placeholder="请输入评论"></textarea>
+                    <div class="length-block"><span class="length-textarea-a879df4ea9dc4768ade6529ef3d6cc08 "><span class="statistics">0</span>/1000</span><div></div></div>
+                    <a data-blog-id="a879df4ea9dc4768ade6529ef3d6cc08" data-status="1" data-comment-level="1" data-textarea="textarea-a879df4ea9dc4768ade6529ef3d6cc08" class="comment-section-comment-btn omment-btn-disbled btn-submit-comment" mate_data_ts="bbs_blogdetail_comment.click.mysql 双1设置">评论</a>
+                </div>
+                <!--如果允许评论/博客评论区 end -->
+
+                <!--用户未登录评论状态 start-->
+                <div class="cloud-blog-detail-comment-section ask-tip unlisted" style="display: none;">
+                    <p>登录后可评论，请 <a href="https://auth.huaweicloud.com/authui/login?service=https://bbs.huaweicloud.com/blogs/a879df4ea9dc4768ade6529ef3d6cc08&amp;locale=zh-cn">登录</a> 或 <a href="https://reg.huaweicloud.com/registerui/public/custom/register.html?locale=zh-cn&amp;service=https://bbs.huaweicloud.com#/register">注册</a></p>
+                    <a class="comment-section-comment-btn omment-btn-disbled">评论</a>
+                </div>
+
+                <div class="cloud-blog-detail-comment-section blog-limit" hidden="" style="display: none;">
+                    <p>您没有权限执行当前操作</p>
+                </div>
+
+            </div>
+
+
+
+            <!-- </div> -->
+        </div>
+    </div>
+
+    <!-- 评论tpl -->
+
+
+
+
+</div>
