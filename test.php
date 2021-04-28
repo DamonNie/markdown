@@ -14,10 +14,10 @@ use damon\src\ext\File;
 use damon\src\Custom;
 
 set_time_limit(0);
+$path = 'C:\Users\W9004022\Desktop\test';
+$data = (new File())->generateEncryptFiles($path);
 //$path = 'C:\damon\phpwork\demo\markdown\pms';
-//$data = (new File())->generateEncryptFiles($path);
-$path = 'C:\damon\phpwork\demo\markdown\pms';
-$data = (new File())->generateDecryptFiles($path);
+//$data = (new File())->generateDecryptFiles($path);
 
 
 
